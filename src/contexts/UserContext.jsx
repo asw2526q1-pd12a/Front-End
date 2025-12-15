@@ -1,0 +1,76 @@
+import { createContext, useState, useEffect, useContext, useCallback } from 'react';
+import { setApiKey, getCurrentUser } from '../services/api';
+
+const UserContext = createContext();
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const useUser = () => useContext(UserContext);
+
+const MOCK_USERS = [
+  { id: 1, username: 'johndoe', full_name: 'John Doe', apiKey: 'a1b2c3d4e5f6g7h8i9j0' },
+  { id: 11, username: 'nettiewelsh', full_name: 'Nettie Welsh Prod', apiKey: 'be9f7d76709421710909c3a7f2cdb2b61a075b106edab81568b00a85a65660b7' },
+  { id: 3, username: 'admin', full_name: 'Admin User', apiKey: 'u1v2w3x4y5z6a7b8c9d0' },
+];
+
+export const UserProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const logout = useCallback(() => {
+    setUser(null);
+    setApiKey(null);
+    localStorage.removeItem('asw_api_key');
+    setError(null);
+  }, []);
+
+  const login = useCallback(async (mockUser) => {
+    setLoading(true);
+    setError(null);
+    try {
+      setApiKey(mockUser.apiKey);
+      localStorage.setItem('asw_api_key', mockUser.apiKey);
+      
+      const response = await getCurrentUser();
+      // Unwrap 'user' key if present (Rails API convention)
+      setUser(response.data.user || response.data);
+      
+    } catch (err) {
+      console.error("Login verification failed", err);
+      // If 401, it's definitely an invalid token. For others, it might be server issue.
+      // In both cases, for this "simulation", we treat it as a failed login.
+      setUser(null);
+      setError(err.response?.data?.error || "Authentication failed. Please check your API Key or Network.");
+      setApiKey(null);
+      localStorage.removeItem('asw_api_key');
+    } finally {
+      setLoading(false);
+    }
+  }, [logout]);
+
+  // Load user from local storage or default to first mock user on init (optional)
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem('asw_api_key');
+    if (storedApiKey) {
+      const mockUser = MOCK_USERS.find(u => u.apiKey === storedApiKey);
+      if (mockUser) {
+        // We attempt to verify the stored key again
+        login(mockUser);
+      } else {
+        // Stored key doesn't match any mock user (maybe customized?), try to fetch /me anyway?
+        // For simplicity in this scaffold, if not in mock list, we ignore it or just try /me
+        // Let's just try /me with the stored key if we wanted to support custom keys, 
+        // but here we stick to the mock logic.
+         setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
+  }, [login]);
+
+  return (
+    <UserContext.Provider value={{ user, login, logout, users: MOCK_USERS, loading, error }}>
+      {children}
+    </UserContext.Provider>
+  );
+};
