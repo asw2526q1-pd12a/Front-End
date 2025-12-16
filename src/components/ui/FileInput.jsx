@@ -38,7 +38,7 @@ export const FileInput = ({ label, file, setFile, id, accept = "image/png,image/
                 <div style={{ position: 'absolute', top: '50%', left: '50%', width: '12px', height: '2px', backgroundColor: 'currentColor', transform: 'translate(-50%, -50%)' }}></div>
                 <div style={{ position: 'absolute', top: '50%', left: '50%', width: '2px', height: '12px', backgroundColor: 'currentColor', transform: 'translate(-50%, -50%)' }}></div>
             </div>
-            <span>Clic para subir imagen <span style={{fontSize: '11px', opacity: 0.8}}>(JPG, PNG)</span></span>
+            <span>Click para subir imagen <span style={{fontSize: '11px', opacity: 0.8}}>(JPG, PNG)</span></span>
         </div>
       )}
     </label>

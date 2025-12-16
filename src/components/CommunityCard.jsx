@@ -3,7 +3,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 export default function CommunityCard({ community, isSubscribed, onSubscribe, onUnsubscribe, showSubscribeButton }) {
-    // Si no hay avatar, usamos un placeholder con la inicial
     const avatarUrl = community.avatar || null;
     const initial = community.title ? community.title.charAt(0).toUpperCase() : '?';
 
@@ -11,19 +10,18 @@ export default function CommunityCard({ community, isSubscribed, onSubscribe, on
         <div style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between', // Separa info a la izq y botones a la der
+            justifyContent: 'space-between', 
             backgroundColor: '#fff',
             padding: '20px',
             borderRadius: '12px',
-            border: '1px solid rgb(145, 141, 219)', // Borde sutil
-            marginBottom: '15px',         // Separación entre tarjetas
+            border: '1px solid #E5E7EB', 
+            marginBottom: '15px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
             transition: 'transform 0.1s ease-in-out',
         }}>
             {/* IZQUIERDA: Avatar + Info */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 
-                {/* Avatar Circular */}
                 <div style={{
                     width: '56px',
                     height: '56px',
@@ -36,7 +34,8 @@ export default function CommunityCard({ community, isSubscribed, onSubscribe, on
                     justifyContent: 'center',
                     fontSize: '24px',
                     fontWeight: 'bold',
-                    color: '#9CA3AF'
+                    color: '#9CA3AF',
+                    border: '1px solid #E5E7EB'
                 }}>
                     {avatarUrl ? (
                         <img 
@@ -49,27 +48,26 @@ export default function CommunityCard({ community, isSubscribed, onSubscribe, on
                     )}
                 </div>
 
-                {/* Textos */}
-                <div>
+                <div style={{ textAlign: 'left' }}>
                     <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700' }}>
+                        {/* CORRECCIÓN AQUÍ: Usamos `community.name` para el enlace */}
                         <Link 
-                            to={`/c/${community.title}`} 
+                            to={`/c/${community.name}`} 
                             style={{ textDecoration: 'none', color: '#111827' }}
                             onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
                             onMouseOut={(e) => e.target.style.textDecoration = 'none'}
                         >
-                            {community.title}
+                            {community.title || community.name}
                         </Link>
                     </h3>
                     <p style={{ margin: '4px 0 0 0', color: '#6B7280', fontSize: '13px' }}>
-                        {community.members_size || 0} suscriptores • {community.posts_size || 0} publicaciones
+                        {community.members_size || 0} suscriptores • {community.posts_size || 0} publicaciones • {community.total_comments_count || 0} comentarios
                     </p>
                 </div>
             </div>
 
-            {/* DERECHA: Botones alineados verticalmente al centro */}
+            {/* DERECHA: Botones */}
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                {/* Botón Ver (Secundario) */}
                 <Link 
                     to={`/c/${community.name}`} 
                     style={{
@@ -86,17 +84,16 @@ export default function CommunityCard({ community, isSubscribed, onSubscribe, on
                     Ver
                 </Link>
 
-                {/* Botón Suscribirse (Primario/Acción) */}
                 {showSubscribeButton && (
                     isSubscribed ? (
                         <button 
-                            onClick={() => onUnsubscribe(community.name)}
+                            onClick={onUnsubscribe} // Ya pasamos la función con los parámetros desde el padre
                             style={{
                                 padding: '8px 16px',
                                 borderRadius: '20px',
                                 border: '1px solid #D1D5DB',
                                 backgroundColor: '#fff',
-                                color: '#EF4444', // Rojo para salir
+                                color: '#EF4444', 
                                 cursor: 'pointer',
                                 fontWeight: '600',
                                 fontSize: '14px'
@@ -106,12 +103,12 @@ export default function CommunityCard({ community, isSubscribed, onSubscribe, on
                         </button>
                     ) : (
                         <button 
-                            onClick={() => onSubscribe(community.name)}
+                            onClick={onSubscribe}
                             style={{
                                 padding: '8px 16px',
                                 borderRadius: '20px',
                                 border: 'none',
-                                backgroundColor: '#111827', // Negro
+                                backgroundColor: '#111827',
                                 color: '#fff',
                                 cursor: 'pointer',
                                 fontWeight: '600',

@@ -56,11 +56,11 @@ export default function CreateCommunityPage() {
                 border: '1px solid #E5E7EB'
             }}>
                 <div style={{ marginBottom: '30px', textAlign: 'center' }}>
-                    <h2 style={{ fontSize: '26px', fontWeight: '800', color: '#111827', marginBottom: '10px' }}>
+                    <h2 style={{ fontSize: '37px', fontWeight: '800', color: '#111827', marginBottom: '10px' }}>
                         Crear una comunidad
                     </h2>
                     <p style={{ color: '#4B5563', fontSize: '15px', margin: 0 }}>
-                        Configura tu nuevo espacio.
+                        Configura tu nuevo espacio
                     </p>
                 </div>
 
@@ -77,7 +77,7 @@ export default function CreateCommunityPage() {
 
                     <TextInput 
                         label="Título de la Comunidad"
-                        placeholder="El nombre visible (ej. Programación Avanzada)"
+                        placeholder="ej. Programación Avanzada"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                     />
