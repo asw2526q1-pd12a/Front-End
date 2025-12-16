@@ -40,3 +40,1156 @@
 .read-the-docs {
   color: #888;
 }
+
+
+/* -------------------------------------------------------------------
+ * Post Form Styles - Custom CSS for Dark Theme
+ * ------------------------------------------------------------------- */
+
+/* Base Styles: Black Background, White Text */
+body {
+    background-color: #d8d8d8; /* Very dark gray/black */
+    color: #ffffff; /* White text for contrast */
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.post-community-link {
+    color: #576e9b;  /* Un gris claro, como el resto del post-meta */
+    font-weight: 500;
+    text-decoration: none; /* Quita el subrayado */
+  }
+  
+  .post-community-link:hover {
+    color: #3d3f42; /* Un poco más claro al pasar el ratón */
+    text-decoration: underline; /* Subraya al pasar el ratón */
+  }
+
+a {
+    color: #054b91ff; /* A lighter blue for links */
+    text-decoration: none;
+}
+
+.edit-form form {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 30px;
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    background-color: #d6d6d6;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.05);
+}
+
+/* Style the main heading */
+.edit-form h2 {
+    text-align: center;
+    color: #000000;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+    border-bottom: 2px solid #000000;
+    padding-bottom: 10px;
+}
+
+/* Style individual field containers */
+.field {
+    margin-bottom: 15px;
+}
+
+/* Style labels */
+.field label {
+    display: block;
+    /* Make label take its own line */
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #b1b1b1;
+}
+
+/* Style all text inputs, textareas, and file inputs */
+input[type="email"],
+input[type="text"],
+input[type="file"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #c5c5c5;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-top: 3px;
+    font-size: 1em;
+    background-color: #c9c9c9;
+}
+
+/* Highlight input when focused */
+input[type="email"]:focus,
+input[type="text"]:focus,
+textarea:focus {
+    border-color: #17302a;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+}
+
+/* Style the disabled email field */
+input[type="email"][disabled] {
+    background-color: #01ce97;
+    color: #222222;
+    cursor: not-allowed;
+}
+
+.edit-form textarea {
+    resize: vertical;
+    /* Allow vertical resizing only */
+    min-height: 100px;
+}
+
+/* --- Image Previews --- */
+/* Style for avatar and banner images */
+.edit-form img {
+    display: block;
+    margin: 10px 0;
+    border: 1px solid #252525;
+    border-radius: 4px;
+    object-fit: cover;
+    /* Ensures images maintain aspect ratio */
+}
+
+/* --- Action Buttons --- */
+.actions {
+    padding-top: 15px;
+    border-top: 1px solid #272727;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Style the Update button (submit) */
+.actions input[type="submit"] {
+    background-color: #04940b;
+    /* Green */
+    color: rgb(0, 0, 0);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+}
+
+.back-link {
+    color: #001831;
+    text-decoration: none;
+    padding: 10px 0;
+    font-size: 1.1em;
+    transition: color 0.3s ease;
+    
+}
+
+.back-link:hover {
+    color: #002a57;
+    text-decoration: underline;
+}
+
+.actions input[type="submit"]:hover {
+    background-color: #1f4921;
+}
+
+/* Style the container for the cancel button */
+.delete-account {
+    text-align: center;
+    margin-bottom: 20px;
+    color: rgb(32, 32, 32);
+}
+
+/* Style the Cancel button (button_to) */
+.delete-account button[type="submit"] {
+    background-color: #ff5454;
+    /* Red */
+    color: rgb(255, 255, 255);
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-left: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.delete-account button[type="submit"]:hover {
+    background-color: #ce0000;
+}
+
+/* --- Devise Error Messages (Optional, but helpful) --- */
+#error_explanation {
+    background-color: #272424;
+    color: #b60a0a;
+    padding: 15px;
+    border: 1px solid #292424;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+#error_explanation h2 {
+    color: #b60a0a;
+    font-size: 1.2em;
+    margin-top: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* -------------------- GENERAL LAYOUT & HEADER -------------------- */
+
+.app-header {
+    background-color: #799cce; /* Slightly lighter gray than body for header */
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.4);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 20px; /* Reduced padding */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-center-group {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.app-logo {
+    font-size: 1.4em; /* Slightly smaller */
+    font-weight: bold;
+    color: #000000;
+    padding-right: 20px; /* Reduced spacing */
+    text-decoration: none;
+}
+
+/* Buttons in the Header */
+.nav-button,
+.auth-button {
+    padding: 6px 12px; /* Reduced padding */
+    border-radius: 4px; /* Slightly less rounded */
+    font-size: 0.85em; /* Slightly smaller font */
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s;
+    margin: 0 4px; /* Reduced margin */
+    border: 1px solid transparent;
+}
+
+.nav-button {
+    color: #000000;
+    background-color: transparent;
+}
+
+.nav-button:hover {
+    background-color: #99bbe7;
+}
+
+.create-post-button {
+    background-color: #3b82f6; /* Blue primary action */
+    color: #000000;
+}
+
+.create-post-button:hover {
+    background-color: #4e4a92;
+}
+
+.auth-group {
+    display: flex;
+    align-items: center;
+}
+
+.auth-button.sign-in {
+    background-color: #88b0e9;
+    border-color: #9eb1cc;
+}
+
+.auth-button.log-in {
+    background-color: #0a172c;
+    border-color: #0a172c;
+    color: #ffffff;
+}
+.auth-button.log-in:hover {
+    background-color: #081736;
+}
+
+.user-menu-container {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-dropdown-toggle {
+    background-color: transparent;
+    color: #000000;
+    font-weight: bold;
+    border: 0;
+}
+
+.dropdown-menu {
+    width: 160px;
+    font-size: inherit;
+    display: none;
+    position: absolute;
+    right: 0; 
+    z-index: 100;
+    list-style: none;
+    text-align: left;
+    margin-top: 0;
+    background-color: #9cb7e2;
+    border: 1px solid #d4d4d4;
+    border-radius: 0.375rem;
+    padding: 0.25rem 0;
+}
+
+.dropdown-item {
+    color: #000000;
+    display: block;
+    width: 100%;
+    clear: both;
+    font-weight: 400;
+    padding: 0.25rem 1rem;
+    background-color: transparent;
+    border: 0;
+    box-sizing: border-box;
+    font-size: inherit;
+    text-align: inherit;
+    text-decoration: none;
+}
+
+.dropdown-item:hover {
+    background-color: #3f526eff;
+}
+
+.dropdown-item:active {
+    background-color: #017054;
+}
+
+.dropdown-divider {
+    background-color: #bbbbbb;
+    margin: 0.5em 0;
+}
+
+.user-menu-container:hover .dropdown-menu {
+    display: block;
+}
+
+/* -------------------- MAIN CONTENT LAYOUT -------------------- */
+
+.main-layout {
+    max-width: 1200px;
+    margin: 20px auto 0 auto;
+    padding: 20px 20px; /* Reduced padding */
+    display: flex;
+    gap: 20px; /* Reduced gap */
+    justify-content: center;
+}
+
+/* Off-center layout: Feed takes 2/3, Sidebar takes 1/3 */
+.feed-column {
+    flex: 1;
+    min-width: 0;
+}
+
+.sidebar-column {
+    flex: 1;
+    min-width: 250px; /* Slightly narrower sidebar */
+    position: sticky;
+    top: 80px; /* Adjusted sticky position */
+}
+
+/* -------------------- POST CARD STYLES (Detailed) -------------------- */
+.post-card {
+    background-color: #e1f1ff;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid #7698db;
+    margin-bottom: 10px; /* Reduced margin between cards */
+    color: #000000;
+    display: flex;
+    align-items: center; /* Align items center for tighter row */
+}
+
+/* 1. Voting Column */
+.voting-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Center votes vertically */
+    padding: 8px 6px; /* Reduced padding */
+    background-color: #b4b4b4;
+    border-radius: 20px 0 0 20px;
+    height: 100%; /* Take full height of post-card */
+    min-width: 40px; /* Narrower width */
+    flex-shrink: 0;
+}
+
+.vote-button {
+    background: none;
+    border: none;
+    color: #0b1c3b; /* More subdued than d1d5db */
+    cursor: pointer;
+    padding: 2px;
+    transition: color 0.2s;
+    line-height: 1; /* Tighter line height for buttons */
+}
+
+.vote-button:hover {
+    color: #0f54c4;
+}
+
+.vote-score {
+    font-weight: bold;
+    font-size: 0.9em; /* Smaller score font */
+    margin: 2px 0; /* Reduced margin */
+    color: #000000;
+}
+
+/* 2. Post Image/Thumbnail (Now resembling a comment icon more closely) */
+
+
+/* Ensure post-content-section still expands */
+.post-card .post-content-section {
+    flex-grow: 1;
+}
+
+.post-image-link {
+    width: 120px; /* Smaller square */
+    height: 120px; /* Smaller square */
+    flex-shrink: 0;
+    margin: 0 10px; /* Centered between voting and content */
+    border-radius: 4px;
+    background-color: #7c9bd1; /* Darker placeholder */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #252525;
+    align-self: center; /* Align to center of the card */
+}
+
+.post-image-link .placeholder-icon {
+    width: 20px; /* Smaller icon */
+    height: 20px;
+    color: #3d4046; /* More subdued */
+}
+
+/* 3. Post Content Group (Title, Details, Actions) */
+.post-content-section {
+    flex-grow: 1;
+    padding: 10px 15px 10px 0; /* Reduced padding, no left padding as image provides spacing */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0; /* Allows content to shrink */
+}
+
+.post-title {
+    font-weight: bold;
+    font-size: 1.4em; /* Smaller title font */
+    color: #000000;
+    margin-bottom: 2px; /* Very tight spacing */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.post-meta {
+    font-size: 0.75em; /* Smaller meta font */
+    color: #27292c;
+    margin-bottom: 0px; /* Tight spacing below meta */
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Gap between meta elements like author, community, time */
+}
+.post-meta .community-link {
+    color: #01458a; /* Specific link color for community */
+}
+.post-meta .meta-tag {
+    background-color: #1a2331;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7em;
+    color: #28292b;
+}
+
+.post-image-container {
+    /* This property centers the image horizontally */
+    text-align: center;
+    margin-bottom: 15px;
+    /* Spacing below the image */
+}
+
+.post-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Tighter gap between action buttons */
+    margin-top: 5px; /* Reduced margin from content */
+    padding-top: 5px; /* Reduced padding */
+    border-top: 1px solid #8da6ce; /* Lighter border */
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    color: #313336; /* Subdued color */
+    font-size: 0.8em; /* Smaller font */
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.action-button svg {
+    width: 16px; /* Smaller icon size */
+    height: 16px;
+    margin-right: 4px; /* Tighten icon-text gap */
+}
+
+.action-button:hover {
+    color: #102546;
+}
+
+/* -------------------- FORM STYLES (Inherited) -------------------- */
+
+.post-form-wrapper {
+    width: 100%;
+    max-width: 900px; /* Consistent narrower width for the form */
+    margin: 0 auto;
+    padding-top: 150px; /* Adjusted padding from the top */
+    padding: 20px;
+}
+
+.post-form-container {
+    background-color: #7ea2d4; /* Consistent dark gray */
+    padding: 25px; /* Slightly reduced padding */
+    border-radius: 8px; /* Slightly less rounded */
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 1); /* Lighter shadow */
+    border: 1px solid #849bc0; /* Consistent border */
+    max-width: 750px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.form-title {
+    font-size: 1.6em; /* Slightly smaller title */
+    color: #1a1a1a;
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #7f94b6; /* Consistent border */
+}
+
+.form-field {
+    margin: 20px; /* Reduced margin */
+    /* *** START: CHANGES FOR SIDE-BY-SIDE LAYOUT *** */
+    display: flex;
+    align-items: center; /* Vertically align items */
+    gap: 15px; /* Space between label and input */
+    font-weight: bold;
+    font-size: 15px;
+    color: rgb(65, 62, 62);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 4px; /* Reduced margin */
+    font-weight: bold;
+    color: #2d2e30;
+    font-size: 0.9em; /* Smaller label font */
+    /* *** START: CHANGES FOR SIDE-BY-SIDE LAYOUT *** */
+    flex-basis: 120px; /* Give the label a fixed width */
+    text-align: right; /* Align label text to the right, next to the input */
+    flex-shrink: 0; /* Prevent label from shrinking */
+    /* *** END: CHANGES FOR SIDE-BY-SIDE LAYOUT *** */
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 10px; /* Reduced padding */
+    /* *** START: CHANGES FOR SIDE-BY-SIDE LAYOUT *** */
+    flex-grow: 1; /* Allow input to take up the rest of the space */
+    /* *** END: CHANGES FOR SIDE-BY-SIDE LAYOUT *** */
+    border: 1px solid #7c91b4; /* Consistent border */
+    background-color: #6690e9; /* Darker background for inputs */
+    color: #000000;
+    border-radius: 4px; /* Slightly less rounded */
+    box-shadow: inset 0 1px 2px rgba(235, 234, 234, 0.2); /* Lighter inset shadow */
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    border-color: #00122e;
+    outline: 0;
+    box-shadow: 0 0 0 2px rgba(0, 28, 71, 0.4); /* Smaller focus ring */
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px; /* Slightly smaller min height */
+}
+
+.form-file-input {
+    padding: 8px;
+}
+
+.form-submit-wrapper {
+    padding-top: 15px; /* Reduced padding */
+}
+
+.form-field-stacked {
+    display: block; /* Overrides the flex display */
+    gap: 0;
+    margin-left: 61px;
+}
+
+.form-field-stacked .form-label {
+    flex-basis: auto; /* Remove fixed label width */
+    text-align: left; /* Align label to the left */
+    margin-bottom: 5px; /* Add space between label and textarea */
+}
+
+.form-submit-button {
+    width: 100%;
+    padding: 10px 20px; /* Reduced padding */
+    border-radius: 4px;
+    font-size: 1em; /* Smaller font */
+    background-color: #001331;
+    color: #000000;
+    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.3); /* Lighter shadow */
+}
+
+.form-submit-button:hover {
+    background-color: #031742;
+    box-shadow: 0 3px 6px rgba(255, 255, 255, 0.4);
+}
+
+/* New Comment line form */
+
+.fixed-comment-input-container {
+    /* Make it stick to the bottom of the viewport */
+    position: fixed; 
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* Styling for visibility */
+    background-color: #7499ce; 
+    border-top: 1px solid #869dc4;
+    padding: 10px 0;
+    z-index: 1000; /* Ensure it stays above other content */
+}
+
+/* Limit the width of the content inside the container */
+.fixed-comment-input-content {
+    /* Use the same max-width as your main content area */
+    max-width: 800px; 
+    margin: 0 auto; /* Center the content */
+    padding: 0 15px;
+}
+
+/* Adjust the bottom padding/margin of the body to prevent content from being hidden */
+/* You would need to add this to your main stylesheet */
+body {
+    padding-bottom: 80px; /* Needs to be slightly taller than the fixed container's height */
+}
+
+/* Ensure the form items align horizontally */
+.fixed-form div {
+    display: flex;
+    align-items: center;
+}
+
+/* End of new comment line form */
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .nav-center-group {
+        display: none;
+    }
+    .main-layout {
+        flex-direction: column;
+        padding: 10px; /* Reduced padding */
+    }
+    .sidebar-column {
+        position: static;
+        min-width: auto;
+        margin-top: 10px; /* Space from feed column */
+    }
+    .post-card {
+        margin-bottom: 8px; /* Even tighter spacing on mobile */
+    }
+    .post-image-link {
+        margin: 0 8px;
+    }
+    .post-content-section {
+        padding: 8px 10px 8px 0;
+    }
+    .post-form-wrapper {
+        padding-top: 15px;
+    }
+    .post-form-container {
+        padding: 20px;
+        margin: 0 10px;
+    }
+    .form-field {
+        /* Revert to stacking on small screens for better usability */
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    .form-label {
+        flex-basis: auto; /* Remove fixed width */
+        text-align: left; /* Revert text alignment */
+        margin-bottom: 4px; /* Add back a small margin */
+    }
+}
+
+
+/* Login */
+.login-container {
+    padding: 30px;
+    max-width: 400px;
+    margin: 50px auto;
+    border-radius: 8px;
+    border: 1px solid #1d1d1d;
+    background-color: #92a9cf;
+    color: #36393b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.login-container h2 {
+    color: #1b1b1b;
+    margin-bottom: 25px;
+}
+
+.login-container form {
+    display: inline-block;
+    margin: 0;
+}
+
+.login-container input[type="image"] {
+    display: block;
+    width: 191px;
+    height: auto;
+    margin: 0 auto;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    transition: opacity 0.2s ease;
+}
+
+.login-container input[type="image"]:hover {
+    opacity: 0.9;
+}
+
+
+.community-header-container {
+    position: relative; /* Necesario para el avatar absoluto */
+    width: 100%;
+    margin-top: 66px;
+}
+
+.community-content-wrapper {
+    position: relative; /* Necesario para el avatar absoluto */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    /* Espacio para el avatar que se superpone */
+    padding-top: 66px; 
+    padding-bottom: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+
+    /* CSS para el Banner (que ahora es el fondo) */
+    background-size: cover;
+    background-position: center;
+
+}
+
+.community-avatar-container {
+    /* Posicionado absolutamente relativo al wrapper */
+    position: absolute; 
+    z-index: 2;
+
+    /* Lo subimos la mitad de su altura (120px / 2 = 60px) */
+    top: -66px; 
+
+    /* Lo centramos horizontalmente */
+    left: 50%;
+    transform: translateX(-50%);
+
+    /* Estilos del círculo */       
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 6px solid #4d7ce0; /* Borde oscuro para el avatar */
+    background-color: #7c8ba0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.community-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.community-avatar-placeholder {
+    font-size: 3em;
+    color: rgb(0, 0, 0);
+    font-weight: bold;
+}
+
+/* El resto de estilos (texto y botón) no cambian */
+.community-title-overlay {
+    font-size: 2.5em;
+    color: rgb(0, 0, 0);
+    margin: 0 0 5px 0;
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+.community-name-overlay {
+    font-size: 1.2em;
+    color: #000000;
+    margin: 0 0 20px 0;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.community-actions-overlay .nav-button.primary-button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+    font-weight: bold;
+    border-radius: 6px;
+    background-color: #716dbe;
+    color: rgb(0, 0, 0);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-decoration: none;
+    text-align: center;
+}
+/* para que funcione */
+/* -------------------- USER PROFILE -------------------- */
+.banner {
+    height: 250px;
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+}
+
+.profile-banner-image {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    object-position: center center;
+}
+
+/* --- Base styling for all flash messages --- */
+.header-alerts {
+    text-align: center;
+}
+
+.notice,
+.alert {
+    /* Full width banner */
+    width: 100%;
+    padding: 10px 20px;
+    margin: 0;
+    border: 1px solid transparent;
+    /* Base border */
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 1.5;
+    box-sizing: border-box;
+}
+
+/* --- Success/Notice Message Styling --- */
+.notice {
+    background-color: #263028;
+    color: #3bf867;
+    border-color: #233126;
+}
+
+/* --- Error/Alert Message Styling --- */
+.alert {
+    background-color: #412a2c;
+    color: #f14253;
+    border-color: #3a2224;
+}
+
+/* --- Profile Container Styling --- */
+.profile-container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #69a4e7;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.4);
+}
+
+/* --- Username and Header --- */
+.profile-container h1 {
+    color: #363636;
+    /* A contrasting color for the username (e.g., green) */
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* --- Profile Avatar --- */
+.profile-container img {
+    display: block;
+    /* Make image a block element */
+    margin: 0 auto 20px auto;
+    /* Center the image and add space below */
+    border: 3px solid #142436;
+    /* Border color matching the username */
+    border-radius: 50%;
+    /* Makes the image circular */
+    object-fit: cover;
+    /* Ensures the image covers the area without distortion */
+}
+
+/* --- Stats/Info Section (the <div>) --- */
+.profile-container div {
+    text-align: center;
+    padding-top: 15px;
+    border-top: 1px solid #d6d6d6;
+    /* Separator line */
+}
+
+/* --- Small Headers (Views, Posts, Comments) --- */
+.profile-container h6 {
+    display: inline-block;
+    /* Allows items to sit side-by-side */
+    margin: 0 10px;
+    /* Spacing between the stats */
+    font-size: 0.9em;
+    color: #505050;
+    /* Slightly muted color for secondary info */
+}
+
+/* --- Joined Date and Biography Headers --- */
+.profile-container h5 {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+    color: #3f3f3f;
+}
+
+/* --- Bold Text within Headers --- */
+.profile-container h5 b {
+    font-weight: 700;
+}
+
+/* --- Biography Content --- */
+.profile-container .user-bio {
+    text-align: left;
+    /* Align bio text to the left for better readability */
+    line-height: 1.6;
+    /* Increased line height for easy reading */
+    margin-top: 0;
+    padding: 10px 0;
+}
+
+/* --- General Spacing for Stats Block --- */
+/* You might want to wrap the h6's in their own div for better control */
+/* e.g., <div class="stats-group">...</div> */
+/* If you keep the current structure: */
+.profile-container div h6:last-of-type {
+    margin-bottom: 15px;
+    /* Add space below the stats line */
+}
+
+.user-posts, .user-comments {
+    padding: 30px 90px;
+}
+
+/* --- Estilos para los Filtros de Comunidades --- */
+
+.feed-header-filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #a6bfe7;
+    padding-bottom: 15px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-buttons .nav-button {
+    background-color: #799cce;
+    color: #000000;
+    font-weight: normal;
+    padding: 6px 12px;
+    font-size: 0.9em;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+
+}
+
+.filter-buttons .nav-button.active {
+    background-color: #6466e0;
+    color: #000000;
+    font-weight: bold;
+}
+
+.filter-buttons .nav-button.primary-button {
+    background-color: #251ae7;
+    color: white;
+    font-weight: bold;
+}
+
+.filter-buttons .nav-button:hover {
+    background-color: #99bbe7;
+}
+
+.filter-buttons .nav-button.active:hover {
+    background-color: #4e4a92;
+}
+
+.form-actions {
+    margin-top: 20px; /* Espacio antes del botón */
+}
+
+input[type="submit"].nav-button.primary-button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #0d0f96; /* Color azul/morado */
+    color: rgb(0, 0, 0); /* Texto blanco */
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    
+    /* Esto asegura que se vea como el resto de la fuente */
+    font-family: inherit; 
+  }
+  
+  /* Estilo hover */
+  input[type="submit"].nav-button.primary-button:hover {
+    background-color: #0f0a4d;
+  }
+
+  /* --- Estilos para la Cabecera de Búsqueda --- */
+.feed-header-search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #a6bfe7;
+    padding-bottom: 15px;
+}
+
+.search-form {
+    width: 40%;
+    max-width: 400px;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    background-color: #799fd3; /* Fondo de caja */
+    border: 1px solid #97b1da; /* Borde */
+    color: #313335; /* Texto */
+    border-radius: 6px;
+    padding: 8px 10px 8px 40px; /* Padding izquierdo para el icono */
+    font-size: 14px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #131135; /* Borde morado/azul al hacer foco */
+    box-shadow: 0 0 0 1px #131138;
+}
+
+/* --- Estilos para los Resultados de Búsqueda --- */
+.search-results-header {
+    color: #202224;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #99b0d6;
+    padding-bottom: 5px;
+}
+
+.comment-result-card .post-content-section {
+    padding: 15px; /* Los comentarios no tienen votos, así que usa todo el espacio */   
+}
+
+/* --- Estilos para el Botón de Guardar (Estrella) --- */
+.post-card {
+    position: relative;
+}
+
+.save-button-wrapper {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+}
+
+.save-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.save-button .star-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.save-button.not-saved .star-icon { color: #9CA3AF; }
+.save-button.not-saved:hover .star-icon { color: #FACC15; }
+.save-button.saved .star-icon { color: #FACC15; }
+.save-button.saved:hover .star-icon { color: #eab308; }
+
+/* --- CSS para la nueva barra de filtros y switch --- */
+
+.feed-sorter-bar {
+    display: flex;
+    justify-content: space-between; /* Manda el sorter a la izq. y el switch a la der. */
+    align-items: center;
+    margin-top: 15px; /* Espacio después de la barra de búsqueda */
+    margin-bottom: 20px; /* Espacio antes de la lista de posts */
+}
+  
+.feed-sorter-bar > *,
+.feed-sorter-bar > form {
+    margin-bottom: 0 !important;
+}
