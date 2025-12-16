@@ -7,9 +7,7 @@ const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
 
 const MOCK_USERS = [
-  { id: 1, username: 'johndoe', full_name: 'John Doe', apiKey: 'a1b2c3d4e5f6g7h8i9j0' },
-  { id: 11, username: 'nettiewelsh', full_name: 'Nettie Welsh Prod', apiKey: 'be9f7d76709421710909c3a7f2cdb2b61a075b106edab81568b00a85a65660b7' },
-  { id: 3, username: 'admin', full_name: 'Admin User', apiKey: 'u1v2w3x4y5z6a7b8c9d0' },
+  { id: 11, username: 'nettiewelsh', full_name: 'Nettie Welsh', apiKey: 'be9f7d76709421710909c3a7f2cdb2b61a075b106edab81568b00a85a65660b7' },
   { id: 4, username: 'andreu.corden', full_name: 'andreucordenm53a7a9', apiKey: 'a33591544877c7f2f1975fc489ab6926a3952474cc0d751097ccafd827169259'}
 ];
 
@@ -34,7 +32,8 @@ export const UserProvider = ({ children }) => {
       
       const response = await getCurrentUser();
       // Unwrap 'user' key if present (Rails API convention)
-      setUser(response.data.user || response.data);
+      const userData = response.data.user || response.data;
+      setUser({ ...userData, _lastRefreshed: Date.now() });
       
     } catch (err) {
       console.error("Login verification failed", err);
@@ -47,6 +46,10 @@ export const UserProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const updateUser = useCallback((userData) => {
+    setUser(prev => ({ ...prev, ...userData, _lastRefreshed: Date.now() }));
   }, []);
 
   // Load user from local storage or default to first mock user on init (optional)
@@ -71,7 +74,7 @@ export const UserProvider = ({ children }) => {
   }, [login]);
 
   return (
-    <UserContext.Provider value={{ user, login, logout, users: MOCK_USERS, loading, error }}>
+    <UserContext.Provider value={{ user, login, logout, updateUser, users: MOCK_USERS, loading, error }}>
       {children}
     </UserContext.Provider>
   );

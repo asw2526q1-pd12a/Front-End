@@ -14,9 +14,9 @@ const Navbar = () => {
             </div>
             <div className="navbar-links">
                 <Link to="/">Feed</Link>
-                <Link to="/communities">Communities</Link>
-                <Link to="/create-post">Create Post</Link>
-                {user && <Link to="/profile">Profile</Link>}
+                <Link to="/communities">Comunidades</Link>
+                <Link to="/create-post">Crear Post</Link>
+                {user && <Link to="/profile">Perfil</Link>}
             </div>
             <div className="navbar-user">
                 <button onClick={toggleTheme} className="theme-toggle-btn" title="Toggle Theme">

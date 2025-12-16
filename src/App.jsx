@@ -8,8 +8,8 @@ import CreatePostPage from './pages/CreatePostPage';
 import { ThemeProvider } from './contexts/ThemeContext';
 import './App.css'
 import { UserProvider } from './contexts/UserContext'
-import UserSelector from './components/UserSelector'
 import ProfilePage from './pages/ProfilePage'
+import EditProfilePage from './pages/EditProfilePage';
 import PostShow from './pages/PostShow' // <-- 1. Import your new page
 import PostEditPage from './pages/PostEditPage';
 
@@ -29,8 +29,9 @@ function App() {
                 <Route path="/communities/new" element={<CreateCommunityPage />} />
                 <Route path="/c/:name" element={<CommunityPage />} />
                 <Route path="/create-post" element={<CreatePostPage />} />
+                <Route path="/profile/edit" element={<EditProfilePage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/" element={<ProfilePage />} /> 
+                <Route path="/users/:userId" element={<ProfilePage />} />
                 <Route path="/posts/:id" element={<PostShow />} /> 
                 <Route path="/posts/:id/edit" element={<PostEditPage />} />
               </Routes>
