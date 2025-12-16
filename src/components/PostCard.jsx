@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types'; // Best practice for component props
+import axios from 'axios';
 
 // 1. --- PLACEHOLDER COMPONENTS & HOOKS ---
 // In a real app, these would be separate, functional components/hooks
@@ -50,8 +51,49 @@ function PostCard({ post }) {
     
     // --- Voting Logic Placeholders ---
     // These functions would make the API calls to upvote/downvote
-    const handleUpvote = () => console.log(`Upvoting post ${id}`);
-    const handleDownvote = () => console.log(`Downvoting post ${id}`);
+    const upvotePost = async () => {
+        if (!isLoggedIn) {
+            alert("Debes iniciar sesión para votar.");
+            return; // Stop execution if not authenticated
+        }
+
+        try {
+            await axios.post(`/api/v1/posts/${id}/upvote`);
+            
+            // OPTIONAL: Add some visual feedback here (e.g., console.log, temporary success message)
+            console.log(`Upvote successful for post ID: ${id}`);
+            
+            // NOTE: To update the score visually, the page/feed must be reloaded
+            // or you must manually update state (the complex code you wanted to avoid).
+
+        } catch (error) {
+            console.error("Upvote failed:", error.response || error);
+            // Provide user feedback on failure
+            alert("Error al intentar votar. Revisa la consola para más detalles.");
+        }
+    };
+
+    const downvotePost = async () => {
+        if (!isLoggedIn) {
+            alert("Debes iniciar sesión para votar.");
+            return; // Stop execution if not authenticated
+        }
+
+        try {
+            await axios.post(`/api/v1/posts/${id}/downvote`);
+            
+            // OPTIONAL: Add some visual feedback here (e.g., console.log, temporary success message)
+            console.log(`Downvote successful for post ID: ${id}`);
+            
+            // NOTE: To update the score visually, the page/feed must be reloaded
+            // or you must manually update state (the complex code you wanted to avoid).
+
+        } catch (error) {
+            console.error("Downvote failed:", error.response || error);
+            // Provide user feedback on failure
+            alert("Error al intentar votar. Revisa la consola para más detalles.");
+        }
+    };
 
     // This data would typically come from the API response based on the current user's vote
     const userVoteValue = (postId) => {
@@ -98,7 +140,7 @@ function PostCard({ post }) {
                 
                 {/* UPVOTE BUTTON */}
                 <button 
-                    onClick={handleUpvote} 
+                    onClick={upvotePost} 
                     className="vote-button upvote-button" 
                     style={upvoteStyle}
                 >
@@ -109,7 +151,7 @@ function PostCard({ post }) {
                 
                 {/* DOWNVOTE BUTTON */}
                 <button 
-                    onClick={handleDownvote} 
+                    onClick={downvotePost} 
                     className="vote-button downvote-button" 
                     style={downvoteStyle}
                 >
