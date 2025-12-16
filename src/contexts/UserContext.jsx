@@ -53,6 +53,8 @@ export const UserProvider = ({ children }) => {
     setUser(prev => ({ ...prev, ...userData, _lastRefreshed: Date.now() }));
   }, []);
 
+  const clearError = useCallback(() => setError(null), []);
+
   // Load user from local storage or default to first mock user on init (optional)
   useEffect(() => {
     const storedApiKey = localStorage.getItem('asw_api_key');
@@ -75,7 +77,7 @@ export const UserProvider = ({ children }) => {
   }, [login]);
 
   return (
-    <UserContext.Provider value={{ user, login, logout, updateUser, users: MOCK_USERS, loading, error }}>
+    <UserContext.Provider value={{ user, login, logout, updateUser, clearError, users: MOCK_USERS, loading, error }}>
       {children}
     </UserContext.Provider>
   );
