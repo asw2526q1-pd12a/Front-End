@@ -64,15 +64,15 @@ export const UserProvider = ({ children }) => {
         // We attempt to verify the stored key again
         login(mockUser);
       } else {
-        // Stored key doesn't match any mock user (maybe customized?), try to fetch /me anyway?
-        // For simplicity in this scaffold, if not in mock list, we ignore it or just try /me
-        // Let's just try /me with the stored key if we wanted to support custom keys, 
-        // but here we stick to the mock logic.
-         setLoading(false);
+        // Stored key doesn't match any mock user.
+        // Fallback to default user to enforce "no guest mode"
+        localStorage.removeItem('asw_api_key');
+        login(MOCK_USERS[0]);
       }
     } else {
-      // Default to first mock user if no key is found (since Guest mode is disabled)
-      login(MOCK_USERS[0]);
+      // No stored key found. Remain logged out (Guest state).
+      // The user must explicitly select a user to login.
+      setLoading(false); 
     }
   }, [login]);
 
