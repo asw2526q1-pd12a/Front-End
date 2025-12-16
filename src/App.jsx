@@ -1,3 +1,11 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import FeedPage from './pages/FeedPage';
+import CommunitiesPage from './pages/CommunitiesPage';
+import CreateCommunityPage from './pages/CreateCommunityPage';
+import CommunityPage from './pages/CommunityPage';
+import CreatePostPage from './pages/CreatePostPage';
+import { ThemeProvider } from './contexts/ThemeContext';
 import './App.css'
 import { UserProvider } from './contexts/UserContext'
 import UserSelector from './components/UserSelector'
@@ -7,41 +15,33 @@ import PostEditPage from './pages/PostEditPage';
 import PostNewPage from './pages/PostNewPage';
 import HomePage from './pages/HomePage';
 
-// Import React Router components
-import { BrowserRouter, Routes, Route } from 'react-router-dom' // <-- 2. Import Router components
-
-
 function App() {
   return (
     // The UserProvider and UserSelector stay at the very top, 
     // ensuring context is available for all routes/pages below.
     <UserProvider>
-      <UserSelector /> 
-      
-      {/* 3. Wrap everything that will change based on the URL in <BrowserRouter> */}
-      <BrowserRouter>
-        <div className="app-container">
-          
-          {/* 4. Define the sections that change based on the path */}
-          <Routes>
-            
-            {/* If the URL is '/', show the ProfilePage. This preserves your current functionality. */}
-            <Route path="/" element={<ProfilePage />} /> 
-
-            {/* If the URL is '/posts/1', show the PostShow page, using the dynamic :id parameter. */}
-            <Route path="/posts/:id" element={<PostShow />} /> 
-            
-            {/* You can add more routes here: e.g., <Route path="/posts" element={<PostIndex />} /> */}
-            <Route path="/posts/:id/edit" element={<PostEditPage />} />
-
-            <Route path="/posts/new" element={<PostNewPage />} />
-
-            <Route path="/home" element={<HomePage />} />
-
-          </Routes>
-
-        </div>
-      </BrowserRouter>
+      <ThemeProvider>
+        <BrowserRouter>
+          <div className="app-layout">
+            <Navbar />
+            <div className="main-content">
+              <Routes>
+                <Route path="/" element={<FeedPage />} />
+                <Route path="/communities" element={<CommunitiesPage />} />
+                <Route path="/communities/new" element={<CreateCommunityPage />} />
+                <Route path="/c/:name" element={<CommunityPage />} />
+                <Route path="/create-post" element={<CreatePostPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/" element={<ProfilePage />} /> 
+                <Route path="/posts/:id" element={<PostShow />} /> 
+                <Route path="/posts/:id/edit" element={<PostEditPage />} />
+                <Route path="/posts/new" element={<PostNewPage />} />
+                <Route path="/home" element={<HomePage />} />
+              </Routes>
+            </div>
+          </div>
+        </BrowserRouter>
+      </ThemeProvider>
     </UserProvider>
   )
 }

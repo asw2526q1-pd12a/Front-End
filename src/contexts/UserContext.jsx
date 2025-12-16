@@ -46,7 +46,7 @@ export const UserProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [logout]);
+  }, []);
 
   // Load user from local storage or default to first mock user on init (optional)
   useEffect(() => {
@@ -64,7 +64,8 @@ export const UserProvider = ({ children }) => {
          setLoading(false);
       }
     } else {
-      setLoading(false);
+      // Default to first mock user if no key is found (since Guest mode is disabled)
+      login(MOCK_USERS[0]);
     }
   }, [login]);
 

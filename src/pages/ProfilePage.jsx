@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 
 export default function ProfilePage() {
   const { user, loading, error } = useUser();
+  const [imageError, setImageError] = useState(false);
 
   if (loading) return <div>Loading user data...</div>;
   
@@ -35,11 +37,17 @@ export default function ProfilePage() {
         {/* Profile Info */}
         <div style={{ padding: '20px', position: 'relative' }}>
           {/* Avatar */}
-          <div style={{ position: 'absolute', top: '-50px', left: '20px', width: '100px', height: '100px', borderRadius: '50%', border: '4px solid white', overflow: 'hidden', backgroundColor: '#ccc' }}>
-            {user?.avatar_url ? (
-              <img src={user.avatar_url} alt={user.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div key={user?.id} style={{ position: 'absolute', top: '-50px', left: '20px', width: '100px', height: '100px', borderRadius: '50%', border: '4px solid white', overflow: 'hidden', backgroundColor: '#ccc' }}>
+            {user?.avatar_url && !imageError ? (
+              <img 
+                src={user.avatar_url} 
+                alt={user.username} 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                referrerPolicy="no-referrer"
+                onError={() => setImageError(true)}
+              />
             ) : (
-                <div style={{width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize: '30px', color:'#fff'}}>
+                <div style={{width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize: '30px', color:'#fff', backgroundColor: '#888'}}>
                     {user?.username?.charAt(0).toUpperCase() || '?'}
                 </div>
             )}
