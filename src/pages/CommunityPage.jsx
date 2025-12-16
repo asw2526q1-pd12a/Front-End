@@ -105,7 +105,7 @@ export default function CommunityPage() {
                                     {community.title}
                                 </h1>
                                 <p style={{ margin: '0', color: '#666' }}>
-                                    c/{community.name}
+                                    {community.name}
                                 </p>
                             </div>
                             
