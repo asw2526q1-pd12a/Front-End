@@ -29,6 +29,7 @@
   text-decoration: none;
   background: linear-gradient(90deg, #646cff, #9089fc);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -62,24 +63,79 @@
 .user-selector-container {
   display: flex;
   align-items: center;
-  background-color: var(--card-bg); /* Or specific input bg */
-  padding: 4px 10px;
-  border-radius: 20px;
-  border: 1px solid var(--border-color);
-}
-
-.user-select-dropdown {
+  /* Remove old container padding/border as button handles it now */
   background-color: transparent;
-  color: var(--input-text);
   border: none;
-  font-size: 0.9rem;
-  outline: none;
-  cursor: pointer;
+  padding: 0;
 }
 
-.user-select-dropdown option {
+/* Custom Dropdown Button */
+.user-select-button {
   background-color: var(--card-bg);
   color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 6px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+  justify-content: space-between;
+}
+
+.dropdown-arrow {
+  font-size: 0.7em;
+  opacity: 0.7;
+}
+
+/* Custom Options List (Absolute) */
+.custom-options-list {
+  position: absolute;
+  top: 110%; /* Just below the button */
+  right: 0;
+  width: 100%;
+  min-width: 180px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  list-style: none;
+  padding: 5px 0;
+  margin: 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+/* Custom Option Item */
+.custom-option {
+  padding: 8px 15px;
+  cursor: pointer;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+/* Hover State - Normal Mode */
+.custom-option:hover {
+  background-color: var(--navbar-border);
+}
+
+/* Specific Dark Mode Styling as Requested */
+:root[data-theme='dark'] .custom-options-list {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+
+:root[data-theme='dark'] .custom-option {
+  color: white;
+}
+
+/* Green Background on Hover in Dark Mode */
+:root[data-theme='dark'] .custom-option:hover,
+:root[data-theme='dark'] .custom-option.selected {
+  background-color: #28a745;
+  color: white;
 }
 
 /* Main Content */
@@ -112,53 +168,25 @@
 }
 
 
-/* -------------------------------------------------------------------
- * Post Form Styles - Custom CSS for Dark Theme
- * ------------------------------------------------------------------- */
-
-/* Base Styles: Black Background, White Text */
-body {
-    background-color: #d8d8d8; /* Very dark gray/black */
-    color: #ffffff; /* White text for contrast */
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-}
-
-.post-community-link {
-    color: #576e9b;  /* Un gris claro, como el resto del post-meta */
-    font-weight: 500;
-    text-decoration: none; /* Quita el subrayado */
-  }
-  
-  .post-community-link:hover {
-    color: #3d3f42; /* Un poco más claro al pasar el ratón */
-    text-decoration: underline; /* Subraya al pasar el ratón */
-  }
-
-a {
-    color: #054b91ff; /* A lighter blue for links */
-    text-decoration: none;
-}
+/* Post Form Styles Removed - Using Global Theme via index.css */
 
 .edit-form form {
     max-width: 600px;
     margin: 20px auto;
     padding: 30px;
-    border: 1px solid #cecece;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    background-color: #d6d6d6;
-    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.05);
+    background-color: var(--card-bg);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Style the main heading */
 .edit-form h2 {
     text-align: center;
-    color: #000000;
+    color: var(--text-color);
     margin-bottom: 25px;
     font-size: 1.8em;
-    border-bottom: 2px solid #000000;
+    border-bottom: 2px solid var(--border-color);
     padding-bottom: 10px;
 }
 
@@ -173,7 +201,8 @@ a {
     /* Make label take its own line */
     margin-bottom: 5px;
     font-weight: bold;
-    color: #b1b1b1;
+    color: var(--text-color);
+    opacity: 0.8;
 }
 
 /* Style all text inputs, textareas, and file inputs */
@@ -183,28 +212,30 @@ input[type="file"],
 textarea {
     width: 100%;
     padding: 10px;
-    border: 1px solid #c5c5c5;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     box-sizing: border-box;
     margin-top: 3px;
     font-size: 1em;
-    background-color: #c9c9c9;
+    background-color: var(--input-bg);
+    color: var(--input-text);
 }
 
 /* Highlight input when focused */
 input[type="email"]:focus,
 input[type="text"]:focus,
 textarea:focus {
-    border-color: #17302a;
+    border-color: var(--link-color);
     outline: none;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+    box-shadow: 0 0 5px rgba(100, 108, 255, 0.2);
 }
 
 /* Style the disabled email field */
 input[type="email"][disabled] {
-    background-color: #01ce97;
-    color: #222222;
+    background-color: var(--navbar-border);
+    color: var(--text-color);
     cursor: not-allowed;
+    opacity: 0.6;
 }
 
 .edit-form textarea {
@@ -218,7 +249,7 @@ input[type="email"][disabled] {
 .edit-form img {
     display: block;
     margin: 10px 0;
-    border: 1px solid #252525;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     object-fit: cover;
     /* Ensures images maintain aspect ratio */
@@ -227,7 +258,7 @@ input[type="email"][disabled] {
 /* --- Action Buttons --- */
 .actions {
     padding-top: 15px;
-    border-top: 1px solid #272727;
+    border-top: 1px solid var(--border-color);
 
     display: flex;
     justify-content: space-between;
@@ -236,9 +267,9 @@ input[type="email"][disabled] {
 
 /* Style the Update button (submit) */
 .actions input[type="submit"] {
-    background-color: #04940b;
+    background-color: #28a745;
     /* Green */
-    color: rgb(0, 0, 0);
+    color: white;
     padding: 10px 20px;
     border: none;
     border-radius: 4px;
@@ -358,21 +389,33 @@ input[type="email"][disabled] {
 }
 
 .nav-button {
-    color: #000000;
+    color: var(--text-color);
     background-color: transparent;
 }
 
 .nav-button:hover {
-    background-color: #99bbe7;
+    background-color: var(--navbar-border);
 }
 
 .create-post-button {
     background-color: #3b82f6; /* Blue primary action */
-    color: #000000;
+    color: #ffffff; /* White text for contrast on blue */
+}
+
+/* Primary Button Style (Used in Profile) */
+.nav-button.primary-button {
+    background-color: #3b82f6;
+    color: #ffffff;
+    border: 1px solid #3b82f6;
+}
+
+.nav-button.primary-button:hover {
+    background-color: #2563eb;
+    color: #ffffff;
 }
 
 .create-post-button:hover {
-    background-color: #4e4a92;
+    background-color: #2563eb;
 }
 
 .auth-group {
@@ -767,11 +810,7 @@ input[type="email"][disabled] {
     padding: 0 15px;
 }
 
-/* Adjust the bottom padding/margin of the body to prevent content from being hidden */
-/* You would need to add this to your main stylesheet */
-body {
-    padding-bottom: 80px; /* Needs to be slightly taller than the fixed container's height */
-}
+/* body padding-bottom removed to prevent visual artifacts */
 
 /* Ensure the form items align horizontally */
 .fixed-form div {
