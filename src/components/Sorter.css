@@ -1,0 +1,50 @@
+/* src/components/Sorter.css */
+.dropdown-item.active-sort {
+  background-color: #3f526eff; 
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.sorter-container {
+  width: 280px;
+  background-color: #3b82f6;  
+  border-radius: 8px;        
+  padding: 10px 10px;        
+  margin-bottom: 15px;   
+  font-weight: bold;
+  text-align: center;     
+}
+
+.sorter-container .dropdown-menu {
+  width: 190px;  
+  left: 0;      
+  right: auto;  
+  background-color: #9cb7e2;
+  border: 1px solid #d4d4d4;
+  /* Add key styling for dropdowns that pop out of the normal flow */
+  position: absolute; 
+  z-index: 1000;
+  list-style: none;
+  padding: 5px 0;
+  margin: 2px 0 0;
+  display: none; /* Initially hidden */
+}
+
+/* Ensure dropdown menu is visible when the container is active/open */
+.sorter-container.open .dropdown-menu {
+    display: block;
+}
+
+.sorter-container .dropdown-item {
+  font-size: 14px;
+  color: #000000;
+  padding: 8px 16px; /* Added padding for clicking */
+  cursor: pointer;
+  display: block;
+  text-decoration: none;
+}
+
+/* Optional: Add hover state for better UX */
+.sorter-container .dropdown-item:hover {
+    background-color: #799bce;
+}
