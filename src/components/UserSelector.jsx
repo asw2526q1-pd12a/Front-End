@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 
 const UserSelector = () => {
-  const { user, login, logout, users } = useUser();
+  const { user, login, logout, users, error, clearError } = useUser();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -24,7 +24,11 @@ const UserSelector = () => {
     <div className="user-selector-container custom-dropdown" style={{ position: 'relative' }}>
       <button 
         className="user-select-button" 
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (error) clearError();
+        }}
+        style={error ? { borderColor: '#ef4444' } : {}}
       >
         {currentUsername}
         <span className="dropdown-arrow">▼</span>
@@ -48,6 +52,26 @@ const UserSelector = () => {
             </li>
           ))}
         </ul>
+      )}
+
+       {error && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          right: 0,
+          marginTop: '5px',
+          backgroundColor: '#fee2e2',
+          border: '1px solid #f87171',
+          color: '#b91c1c',
+          padding: '8px',
+          borderRadius: '4px',
+          fontSize: '0.75rem',
+          whiteSpace: 'nowrap',
+          zIndex: 1001,
+          boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+        }}>
+          {error}
+        </div>
       )}
     </div>
   );

@@ -121,6 +121,10 @@
   background-color: var(--navbar-border);
 }
 
+.custom-option.selected {
+    background-color: #28a745;
+}
+
 /* Specific Dark Mode Styling as Requested */
 :root[data-theme='dark'] .custom-options-list {
   background-color: #2a2a2a;

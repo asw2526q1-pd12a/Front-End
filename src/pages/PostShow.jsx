@@ -6,20 +6,15 @@ import CommentCard from '../components/CommentCard'; // <-- NEW: Component for i
 import CommentForm from '../components/CommentForm'; // <-- NEW: Component for the sticky form
 import Sorter from '../components/Sorter'; // <-- NEW: Placeholder for the sorter
 
-// Placeholder for user context (replace with your actual context usage)
-const useCurrentUser = () => ({ 
-    id: 1, 
-    username: 'currentuser', 
-    isLoggedIn: true 
-}); 
+import { useUser } from '../contexts/UserContext';
 
 function PostShow() {
     const { id } = useParams();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const currentUser = useCurrentUser();
-    const isLoggedIn = currentUser.isLoggedIn;
+    const { user: currentUser } = useUser();
+    const isLoggedIn = !!currentUser;
 
     // 1. DATA FETCHING EFFECT (Same as before)
     useEffect(() => {
