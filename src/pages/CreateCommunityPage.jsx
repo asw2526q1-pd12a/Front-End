@@ -40,7 +40,7 @@ export default function CreateCommunityPage() {
     return (
         <main style={{ 
             minHeight: '50vh', 
-            backgroundColor: '#314373',
+            backgroundColor: '#ffffff',
             display: 'flex',             // Activar Flexbox
             justifyContent: 'center',    // Centrar horizontalmente
             alignItems: 'center',        // Centrar verticalmente
@@ -51,7 +51,7 @@ export default function CreateCommunityPage() {
                 maxWidth: '550px',       // Ligeramente más estrecho para un look más compacto
                 backgroundColor: '#ffffff', 
                 borderRadius: '16px',    // Bordes un poco más redondeados
-                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', // Sombra más suave
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)', // Sombra más suave
                 padding: '40px',
                 border: '1px solid #E5E7EB'
             }}>
