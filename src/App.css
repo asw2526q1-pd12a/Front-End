@@ -1,42 +1,112 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
+/* Global Layout */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Navbar Container */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  background-color: var(--navbar-bg);
+  border-bottom: 1px solid var(--navbar-border);
+  height: 64px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Subtle shadow, maybe adjust for dark mode via opacity if needed */
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Navbar Brand */
+.navbar-brand a {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--navbar-text); /* Use general text or specific brand color? */
+  text-decoration: none;
+  background: linear-gradient(90deg, #646cff, #9089fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Navbar Links */
+.navbar-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.navbar-links a {
+  color: var(--navbar-text);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.navbar-links a:hover {
+  color: var(--navbar-text-hover);
+}
+
+/* User Selector Area */
+.navbar-user {
+  margin-left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-selector-container {
+  display: flex;
+  align-items: center;
+  background-color: var(--card-bg); /* Or specific input bg */
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+}
+
+.user-select-dropdown {
+  background-color: transparent;
+  color: var(--input-text);
+  border: none;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.user-select-dropdown option {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+/* Main Content */
+.main-content {
   padding: 2rem;
-  text-align: center;
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  transition: background 0.3s;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+.theme-toggle-btn:hover {
+  background-color: var(--navbar-border);
 }
