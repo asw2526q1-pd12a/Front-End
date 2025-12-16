@@ -3,6 +3,9 @@ import { UserProvider } from './contexts/UserContext'
 import UserSelector from './components/UserSelector'
 import ProfilePage from './pages/ProfilePage'
 import PostShow from './pages/PostShow' // <-- 1. Import your new page
+import PostEditPage from './pages/PostEditPage';
+import PostNewPage from './pages/PostNewPage';
+import HomePage from './pages/HomePage';
 
 // Import React Router components
 import { BrowserRouter, Routes, Route } from 'react-router-dom' // <-- 2. Import Router components
@@ -29,6 +32,11 @@ function App() {
             <Route path="/posts/:id" element={<PostShow />} /> 
             
             {/* You can add more routes here: e.g., <Route path="/posts" element={<PostIndex />} /> */}
+            <Route path="/posts/:id/edit" element={<PostEditPage />} />
+
+            <Route path="/posts/new" element={<PostNewPage />} />
+
+            <Route path="/home" element={<HomePage />} />
 
           </Routes>
 
