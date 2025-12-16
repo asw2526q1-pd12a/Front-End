@@ -2,12 +2,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createCommunity } from '../services/api';
+import { TextInput } from '../components/ui/TextInput';
+import { FileInput } from '../components/ui/FileInput';
+import { PrimaryButton } from '../components/ui/PrimaryButton';
+import { ErrorAlert } from '../components/ui/ErrorAlert';
 
 export default function CreateCommunityPage() {
     const navigate = useNavigate();
     const [errors, setErrors] = useState([]);
     
-    // Estado para los campos
     const [name, setName] = useState('');
     const [title, setTitle] = useState('');
     const [avatar, setAvatar] = useState(null);
@@ -16,8 +19,6 @@ export default function CreateCommunityPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrors([]);
-
-        // Usamos FormData para enviar archivos [cite: 5]
         const formData = new FormData();
         formData.append('community[name]', name);
         formData.append('community[title]', title);
@@ -26,11 +27,9 @@ export default function CreateCommunityPage() {
 
         try {
             const response = await createCommunity(formData);
-            // Redirigir a la comunidad creada usando el name devuelto
             navigate(`/c/${response.data.name}`);
         } catch (error) {
-            // Manejo de errores de validación de Rails [cite: 29]
-            if (error.response && error.response.data && error.response.data.errors) {
+            if (error.response?.data?.errors) {
                 setErrors(error.response.data.errors);
             } else {
                 setErrors(["Ocurrió un error inesperado."]);
@@ -39,77 +38,62 @@ export default function CreateCommunityPage() {
     };
 
     return (
-        <main className="main-layout">
-            <div className="feed-column">
-                <div className="post-form-container" style={{ padding: '20px', backgroundColor: '#fff', borderRadius: '8px', color: 'black' }}>
-                    <h2 className="form-title">Crear una Nueva Comunidad</h2>
-
-                    {errors.length > 0 && (
-                        <div style={{ color: 'red', marginBottom: '15px', textAlign: 'left' }}>
-                            <h4>{errors.length} error(es) impidió guardar:</h4>
-                            <ul>
-                                {errors.map((err, idx) => <li key={idx}>{err}</li>)}
-                            </ul>
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} style={{textAlign: 'left'}}>
-                        {/* CAMPO 1: Nombre [cite: 31] */}
-                        <div className="form-field" style={{marginBottom: '15px'}}>
-                            <label style={{fontWeight: 'bold'}}>Identificador (sin espacios): </label>
-                            <input 
-                                type="text" 
-                                className="form-input" 
-                                placeholder="nombre_comunidad" 
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                style={{display: 'block', width: '100%', padding: '8px', marginTop: '5px'}}
-                            />
-                            <p style={{ fontSize: '12px', color: '#9CA3AF' }}>Solo letras, números y guiones bajos.</p>
-                        </div>
-
-                        {/* CAMPO 2: Título [cite: 32] */}
-                        <div className="form-field" style={{marginBottom: '15px'}}>
-                            <label style={{fontWeight: 'bold'}}>Título: </label>
-                            <input 
-                                type="text" 
-                                className="form-input" 
-                                placeholder="El título visible de tu comunidad"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                style={{display: 'block', width: '100%', padding: '8px', marginTop: '5px'}}
-                            />
-                        </div>
-
-                        {/* CAMPO 3: Avatar [cite: 33] */}
-                        <div className="form-field" style={{marginBottom: '15px'}}>
-                            <label style={{fontWeight: 'bold'}}>Avatar: </label>
-                            <input 
-                                type="file" 
-                                accept="image/png,image/jpeg,image/gif"
-                                onChange={(e) => setAvatar(e.target.files[0])}
-                                style={{display: 'block', marginTop: '5px'}}
-                            />
-                        </div>
-
-                        {/* CAMPO 4: Banner [cite: 34] */}
-                        <div className="form-field" style={{marginBottom: '15px'}}>
-                            <label style={{fontWeight: 'bold'}}>Banner: </label>
-                            <input 
-                                type="file" 
-                                accept="image/png,image/jpeg,image/gif"
-                                onChange={(e) => setBanner(e.target.files[0])}
-                                style={{display: 'block', marginTop: '5px'}}
-                            />
-                        </div>
-
-                        <div className="form-actions" style={{ marginTop: '20px' }}>
-                            <button type="submit" className="nav-button create-post-button" style={{backgroundColor: '#1a1a1a', color: 'white', padding: '10px 20px'}}>
-                                Crear Comunidad
-                            </button>
-                        </div>
-                    </form>
+        <main style={{ 
+            minHeight: '50vh', 
+            backgroundColor: '#314373',
+            display: 'flex',             // Activar Flexbox
+            justifyContent: 'center',    // Centrar horizontalmente
+            alignItems: 'center',        // Centrar verticalmente
+            padding: '40px'              // Un poco de margen para pantallas pequeñas
+        }}>
+            <div style={{ 
+                width: '100%', 
+                maxWidth: '550px',       // Ligeramente más estrecho para un look más compacto
+                backgroundColor: '#ffffff', 
+                borderRadius: '16px',    // Bordes un poco más redondeados
+                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', // Sombra más suave
+                padding: '40px',
+                border: '1px solid #E5E7EB'
+            }}>
+                <div style={{ marginBottom: '30px', textAlign: 'center' }}>
+                    <h2 style={{ fontSize: '26px', fontWeight: '800', color: '#111827', marginBottom: '10px' }}>
+                        Crear una comunidad
+                    </h2>
+                    <p style={{ color: '#4B5563', fontSize: '15px', margin: 0 }}>
+                        Configura tu nuevo espacio.
+                    </p>
                 </div>
+
+                <ErrorAlert errors={errors} />
+
+                <form onSubmit={handleSubmit}>
+                    <TextInput 
+                        label="Identificador"
+                        placeholder="ej. programacion_avanzada"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        helperText="Sin espacios. Solo letras, números y guiones bajos."
+                    />
+
+                    <TextInput 
+                        label="Título de la Comunidad"
+                        placeholder="El nombre visible (ej. Programación Avanzada)"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
+
+                    <div style={{ marginBottom: '20px' }}>
+                        <FileInput id="avatar-upload" label="Avatar (Opcional)" file={avatar} setFile={setAvatar} />
+                    </div>
+                    
+                    <div style={{ marginBottom: '30px' }}>
+                        <FileInput id="banner-upload" label="Banner (Opcional)" file={banner} setFile={setBanner} />
+                    </div>
+
+                    <PrimaryButton type="submit">
+                        Crear Comunidad
+                    </PrimaryButton>
+                </form>
             </div>
         </main>
     );
