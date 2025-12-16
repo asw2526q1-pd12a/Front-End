@@ -1,14 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 
 export default function ProfilePage() {
   const { user, loading, error } = useUser();
   const [imageError, setImageError] = useState(false);
-
-  // Reset image error when user changes
-  useEffect(() => {
-    setImageError(false);
-  }, [user]);
 
   if (loading) return <div>Loading user data...</div>;
   
@@ -42,7 +37,7 @@ export default function ProfilePage() {
         {/* Profile Info */}
         <div style={{ padding: '20px', position: 'relative' }}>
           {/* Avatar */}
-          <div style={{ position: 'absolute', top: '-50px', left: '20px', width: '100px', height: '100px', borderRadius: '50%', border: '4px solid white', overflow: 'hidden', backgroundColor: '#ccc' }}>
+          <div key={user?.id} style={{ position: 'absolute', top: '-50px', left: '20px', width: '100px', height: '100px', borderRadius: '50%', border: '4px solid white', overflow: 'hidden', backgroundColor: '#ccc' }}>
             {user?.avatar_url && !imageError ? (
               <img 
                 src={user.avatar_url} 

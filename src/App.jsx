@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import FeedPage from './pages/FeedPage';
 import CommunitiesPage from './pages/CommunitiesPage';
+import CreateCommunityPage from './pages/CreateCommunityPage';
 import CreatePostPage from './pages/CreatePostPage';
 import ProfilePage from './pages/ProfilePage';
 import { UserProvider } from './contexts/UserContext';

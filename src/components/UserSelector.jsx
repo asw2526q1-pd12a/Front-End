@@ -23,7 +23,6 @@ const UserSelector = () => {
         onChange={handleUserChange}
         className="user-select-dropdown"
       >
-        <option value={-1}>Guest</option>
         {users.map(u => (
           <option key={u.id} value={u.id}>
             {u.username}

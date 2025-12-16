@@ -1,5 +1,5 @@
 // src/pages/CommunitiesPage.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getCommunities, subscribeCommunity, unsubscribeCommunity } from '../services/api';
 import { useUser } from '../contexts/UserContext';
@@ -13,11 +13,7 @@ export default function CommunitiesPage() {
     // Obtener el filtro de la URL (?filter=subscribed) o por defecto 'todas'
     const filter = searchParams.get('filter') || 'todas';
 
-    useEffect(() => {
-        fetchCommunities();
-    }, [filter, user]); // Recargar si cambia el filtro o el usuario
-
-    const fetchCommunities = async () => {
+    const fetchCommunities = useCallback(async () => {
         setLoading(true);
         try {
             // El backend espera 'subscribed' para el filtro, mapeamos 'suscritas' de la UI a 'subscribed' de la API
@@ -30,7 +26,11 @@ export default function CommunitiesPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filter]);
+
+    useEffect(() => {
+        fetchCommunities();
+    }, [fetchCommunities, user]); // Recargar si cambia el filtro o el usuario
 
     const handleSubscribe = async (name) => {
         try {
