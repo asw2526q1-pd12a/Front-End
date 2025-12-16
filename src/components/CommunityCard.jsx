@@ -1,9 +1,12 @@
 // src/components/CommunityCard.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from '../services/api';
 
 export default function CommunityCard({ community, isSubscribed, onSubscribe, onUnsubscribe, showSubscribeButton }) {
-    const avatarUrl = community.avatar || null;
+    const avatarUrl = community.avatar 
+        ? (community.avatar.startsWith('http') ? community.avatar : `${API_BASE_URL}${community.avatar}`) 
+        : null;
     const initial = community.title ? community.title.charAt(0).toUpperCase() : '?';
 
     return (

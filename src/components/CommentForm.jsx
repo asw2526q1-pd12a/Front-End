@@ -1,6 +1,6 @@
 // src/components/CommentForm.jsx
 import React, { useState } from 'react';
-import axios from 'axios';
+import { createComment } from '../services/api';
 
 function CommentForm({ post, parentId = null }) {
     const [content, setContent] = useState('');
@@ -24,7 +24,7 @@ function CommentForm({ post, parentId = null }) {
 
         try {
             // Note the endpoint: /api/v1/posts/:post_id/comments
-            const response = await axios.post(`/api/v1/posts/${post.id}/comments`, { comment: commentData });
+            const response = await createComment(post.id, { comment: commentData });
             
             console.log("Comment posted successfully:", response.data);
             setContent(''); // Clear the form

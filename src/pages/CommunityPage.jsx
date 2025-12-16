@@ -1,7 +1,7 @@
 // src/pages/CommunityPage.jsx
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getCommunity } from '../services/api';
+import { getCommunity, API_BASE_URL } from '../services/api';
 
 export default function CommunityPage() {
     const { name } = useParams();
@@ -55,7 +55,9 @@ export default function CommunityPage() {
                 <div style={{ 
                     height: '150px', 
                     backgroundColor: '#e0e0e0', 
-                    backgroundImage: community.banner ? `url(${community.banner})` : 'none', 
+                    backgroundImage: community.banner 
+                        ? `url(${community.banner.startsWith('http') ? community.banner : API_BASE_URL + community.banner})` 
+                        : 'none', 
                     backgroundSize: 'cover', 
                     backgroundPosition: 'center' 
                 }}>
@@ -86,7 +88,7 @@ export default function CommunityPage() {
                     }}>
                         {community.avatar ? (
                             <img 
-                                src={community.avatar} 
+                                src={community.avatar.startsWith('http') ? community.avatar : `${API_BASE_URL}${community.avatar}`} 
                                 alt={community.name} 
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                             />

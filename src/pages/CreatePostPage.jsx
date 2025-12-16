@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { getCommunities, createPost } from '../services/api';
 
 function PostNewPage() {
     // 1. STATE MANAGEMENT
@@ -23,9 +23,7 @@ function PostNewPage() {
     useEffect(() => {
         const fetchCommunities = async () => {
             try {
-                // Assuming an API endpoint exists for fetching all communities
-                const response = await axios.get('/api/v1/communities');
-                // Assuming the response data is an array of {id, name} objects
+                const response = await getCommunities();
                 setCommunities(response.data.communities || response.data); 
             } catch (err) {
                 console.error("Failed to load communities:", err);
@@ -77,11 +75,7 @@ function PostNewPage() {
 
         try {
             // POST request to create the new post
-            const response = await axios.post('/api/v1/posts', data, {
-                headers: {
-                    'Content-Type': 'multipart/form-data', 
-                },
-            });
+            const response = await createPost(data);
 
             // Success: Redirect to the newly created post's detail page
             const newPostId = response.data.post.id; // Assuming API returns the new post

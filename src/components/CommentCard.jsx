@@ -12,7 +12,9 @@ function CommentCard({ comment, postId }) {
 
     return (
         <div className="comment-card" key={comment.id}>
-            <p className="comment-author">User ID: {comment.user_id}</p>
+            <p className="comment-author">
+                {comment.user ? comment.user.username : `User ID: ${comment.user_id}`}
+            </p>
             <p className="comment-content">{comment.content}</p>
             <small>Posted: {new Date(comment.created_at).toLocaleDateString()}</small>
             

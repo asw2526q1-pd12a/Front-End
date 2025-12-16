@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import { getPost } from '../services/api';
 import PostCard from '../components/PostCard'; // Assuming you saved the previous component here
 import CommentCard from '../components/CommentCard'; // <-- NEW: Component for individual comments
 import CommentForm from '../components/CommentForm'; // <-- NEW: Component for the sticky form
@@ -26,7 +26,7 @@ function PostShow() {
         const fetchPost = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`/api/v1/posts/${id}`);
+                const response = await getPost(id);
                 setPost(response.data.post);
                 setError(null);
             } catch (err) {

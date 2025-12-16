@@ -1,4 +1,5 @@
 import React from 'react';
+import { API_BASE_URL } from '../services/api';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types'; // Best practice for component props
 
@@ -41,10 +42,11 @@ function PostCard({ post }) {
     comments_count, 
     url, 
     user, 
-    user_id,
+    user_id: destructuredUserId,
     community_id,    // <-- NEW FIELD
     community_name,  // <-- NEW FIELD
 } = post;
+    const user_id = destructuredUserId || user?.id;
     const currentUser = useCurrentUser();
     const isLoggedIn = currentUser?.isLoggedIn;
     
@@ -64,7 +66,7 @@ function PostCard({ post }) {
     // --- Dynamic URL generation (JSX equivalent of Rails path helpers) ---
     const postDetailUrl = `/posts/${id}`; // Matches your router setup
     const userProfileUrl = `/users/${user_id}`; 
-    const communityUrl = `/communities/${community_id}`;
+    const communityUrl = `/c/${community_name}`;
     const commentsUrl = `/posts/${id}/comments`; // Assuming this route exists
 
     // Helper for truncating content (JSX equivalent of post.content.truncate(120))
@@ -73,8 +75,12 @@ function PostCard({ post }) {
     // Helper for safe URL handling
     const safeUrl = url && (url.startsWith('http') ? url : `http://${url}`);
     
-    // Helper for image handling: ASSUMING 'post.image_as_thumbnail_url' is returned by the API
-    const imageThumbnailUrl = post.image_as_thumbnail_url; 
+    // Helper for image handling: Using 'image_url' as seen in PostEditPage
+    const imageThumbnailUrl = post.image_url 
+        ? (post.image_url.startsWith('http') 
+            ? post.image_url 
+            : `${API_BASE_URL}${post.image_url}`)
+        : null; 
     
     // Convert inline styles from CSS syntax to JSX (camelCase)
     const upvoteStyle = { 
@@ -246,11 +252,12 @@ PostCard.propTypes = {
         user_id: PropTypes.number.isRequired,
         // Assuming your API returns nested user and community objects
         user: PropTypes.shape({
+            id: PropTypes.number.isRequired,
             username: PropTypes.string.isRequired,
         }).isRequired,
         community_id: PropTypes.number.isRequired, 
         community_name: PropTypes.string.isRequired,
-        image_as_thumbnail_url: PropTypes.string, // Assumed property from API
+        image_url: PropTypes.string,
     }).isRequired,
 };
 
