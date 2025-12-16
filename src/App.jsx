@@ -19,6 +19,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<FeedPage />} />
                 <Route path="/communities" element={<CommunitiesPage />} />
+                <Route path="/communities/new" element={<CreateCommunityPage />} />
                 <Route path="/create-post" element={<CreatePostPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
               </Routes>
