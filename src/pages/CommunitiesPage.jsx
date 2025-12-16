@@ -1,8 +1,9 @@
 // src/pages/CommunitiesPage.jsx
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getCommunities, subscribeCommunity, unsubscribeCommunity } from '../services/api';
 import { useUser } from '../contexts/UserContext';
+import CommunityCard from '../components/CommunityCard'; // Importamos el nuevo componente
 
 export default function CommunitiesPage() {
     const [communities, setCommunities] = useState([]);
@@ -10,32 +11,30 @@ export default function CommunitiesPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const { user } = useUser();
     
-    // Obtener el filtro de la URL (?filter=subscribed) o por defecto 'todas'
     const filter = searchParams.get('filter') || 'todas';
 
-    const fetchCommunities = useCallback(async () => {
+    useEffect(() => {
+        fetchCommunities();
+    }, [filter, user]);
+
+    const fetchCommunities = async () => {
         setLoading(true);
         try {
-            // El backend espera 'subscribed' para el filtro, mapeamos 'suscritas' de la UI a 'subscribed' de la API
             const apiFilter = filter === 'suscritas' ? 'subscribed' : null;
             const response = await getCommunities(apiFilter);
             setCommunities(response.data);
         } catch (error) {
             console.error("Error cargando comunidades:", error);
-            setCommunities([]); // En caso de error (ej. 404 por no tener suscripciones), vaciamos
+            setCommunities([]);
         } finally {
             setLoading(false);
         }
-    }, [filter]);
-
-    useEffect(() => {
-        fetchCommunities();
-    }, [fetchCommunities, user]); // Recargar si cambia el filtro o el usuario
+    };
 
     const handleSubscribe = async (name) => {
         try {
             await subscribeCommunity(name);
-            fetchCommunities(); // Recargamos para actualizar estado
+            fetchCommunities();
         } catch (error) {
             alert("Error al suscribirse: " + error.message);
         }
@@ -44,86 +43,118 @@ export default function CommunitiesPage() {
     const handleUnsubscribe = async (name) => {
         try {
             await unsubscribeCommunity(name);
-            fetchCommunities(); // Recargamos para actualizar estado
+            fetchCommunities();
         } catch (error) {
             alert("Error al salir de la comunidad: " + error.message);
         }
     };
 
     return (
-        <main className="main-layout">
-            <div className="feed-column">
-                {/* Header y Filtros  */}
-                <div className="feed-header-filters">
-                    <h2 style={{ color: '#242527', fontSize: '20px', margin: 0 }}>
-                        {filter === 'suscritas' ? 'Mis Comunidades' : 'Todas las Comunidades'}
-                    </h2>
+        <main className="main-layout" style={{ backgroundColor: '#F9FAFB', minHeight: '100vh', padding: '20px 0' }}>
+            <div className="feed-column" style={{ maxWidth: '800px', margin: '0 auto' }}>
+                
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    alignItems: 'center', 
+                    marginBottom: '25px'
+                }}>
                     
-                    <div className="filter-buttons">
-                        <button 
-                            className={`nav-button ${filter === 'todas' ? 'active' : ''}`}
-                            onClick={() => setSearchParams({ filter: 'todas' })}
-                        >
-                            Todas
-                        </button>
-
-                        {user && (
+                    {/* Grupo Izquierda: Título y Pestañas */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#111827', margin: 0 }}>
+                            Comunidades
+                        </h2>
+                        
+                        <div style={{ display: 'flex', backgroundColor: '#E5E7EB', padding: '4px', borderRadius: '20px' }}>
                             <button 
-                                className={`nav-button ${filter === 'suscritas' ? 'active' : ''}`}
-                                onClick={() => setSearchParams({ filter: 'suscritas' })}
+                                onClick={() => setSearchParams({ filter: 'todas' })}
+                                style={{
+                                    border: 'none',
+                                    padding: '6px 16px',
+                                    borderRadius: '16px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    backgroundColor: filter === 'todas' ? '#fff' : 'transparent',
+                                    color: filter === 'todas' ? '#111827' : '#6B7280',
+                                    boxShadow: filter === 'todas' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
+                                    transition: 'all 0.2s'
+                                }}
                             >
-                                Suscritas
+                                Todas
                             </button>
-                        )}
-
-                        <Link to="/communities/new" className="nav-button primary-button">
-                            Crear Comunidad
-                        </Link>
+                            {user && (
+                                <button 
+                                    onClick={() => setSearchParams({ filter: 'suscritas' })}
+                                    style={{
+                                        border: 'none',
+                                        padding: '6px 16px',
+                                        borderRadius: '16px',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        backgroundColor: filter === 'suscritas' ? '#fff' : 'transparent',
+                                        color: filter === 'suscritas' ? '#111827' : '#6B7280',
+                                        boxShadow: filter === 'suscritas' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    Suscritas
+                                </button>
+                            )}
+                        </div>
                     </div>
+
+                    {/* Grupo Derecha: Botón Crear Comunidad */}
+                    <Link 
+                        to="/communities/new" 
+                        style={{
+                            backgroundColor: '#111827',
+                            color: '#fff',
+                            padding: '10px 20px',
+                            borderRadius: '24px',
+                            textDecoration: 'none',
+                            fontWeight: '600',
+                            fontSize: '14px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                        }}
+                    >
+                        <span>+</span> Crear Comunidad
+                    </Link>
                 </div>
 
-                {/* Lista de Comunidades */}
+                {/* --- LISTADO DE COMUNIDADES --- */}
                 {loading ? (
-                    <p>Cargando...</p>
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Cargando...</div>
                 ) : communities.length === 0 ? (
-                    <div className="post-card" style={{ textAlign: 'center', padding: '40px' }}>
-                        <p>No hay comunidades. ¡Crea la primera!</p>
+                    <div style={{ 
+                        textAlign: 'center', 
+                        padding: '60px 20px', 
+                        backgroundColor: '#fff', 
+                        borderRadius: '12px',
+                        border: '1px dashed #D1D5DB'
+                    }}>
+                        <p style={{ fontSize: '18px', fontWeight: '600', color: '#374151' }}>No se encontraron comunidades.</p>
+                        <p style={{ color: '#9CA3AF' }}>¡Sé el primero en crear una!</p>
                     </div>
                 ) : (
                     communities.map((community) => (
-                        <div key={community.id} className="post-card" style={{ padding: '20px', display: 'flex', justifyContent: 'spaceBetween', alignItems: 'center', marginBottom: '10px' }}>
-                            
-                            {/* Sección Información [cite: 16] */}
-                            <div style={{textAlign: 'left'}}>
-                                <h3 className="post-title" style={{ margin: 0 }}>
-                                    <Link to={`/c/${community.name}`} className="post-title-link">
-                                        {community.title || community.name}
-                                    </Link>
-                                </h3>
-                                <p className="post-meta" style={{ margin: '5px 0 0 0', color: '#555', fontSize: '0.9em' }}>
-                                    {community.name} &bull; {community.members_size || 0} suscriptores &bull; {community.posts_size || 0} publicaciones &bull; {community.total_comments_count || 0} comentarios
-                                </p>
-                            </div>
-
-                            {/* Sección Botones [cite: 20] */}
-                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
-                                {user && (
-                                    // Nota: Para saber si está suscrito en la vista "Todas", idealmente el backend debería devolver un campo "subscribed_by_current_user".
-                                    // Por ahora, usamos la lógica visual: si estamos en la pestaña "Suscritas", mostramos Salir.
-                                    filter === 'suscritas' ? (
-                                        <button onClick={() => handleUnsubscribe(community.name)} className="nav-button">
-                                            Salir
-                                        </button>
-                                    ) : (
-                                         // En "Todas", asumimos botón de suscribirse (o "Ver" si ya lo está, requeriría lógica extra del backend)
-                                        <button onClick={() => handleSubscribe(community.name)} className="nav-button primary-button">
-                                            Suscribirse
-                                        </button>
-                                    )
-                                )}
-                                <Link to={`/c/${community.name}`} className="nav-button">Ver</Link>
-                            </div>
-                        </div>
+                        <CommunityCard 
+                            key={community.id}
+                            community={community}
+                            // Lógica visual para saber si mostrar "Salir" o "Unirse"
+                            // Si estamos en la pestaña "Suscritas", seguro lo está.
+                            // Si estamos en "Todas", dependería del backend (campo subscribed_by_me), 
+                            // pero como placeholder usaremos la lógica del filtro.
+                            isSubscribed={filter === 'suscritas'} 
+                            showSubscribeButton={!!user}
+                            onSubscribe={handleSubscribe}
+                            onUnsubscribe={handleUnsubscribe}
+                        />
                     ))
                 )}
             </div>

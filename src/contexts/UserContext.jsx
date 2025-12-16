@@ -7,7 +7,7 @@ const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
 
 const MOCK_USERS = [
-  { id: 1, username: 'johndoe', full_name: 'John Doe', apiKey: 'a1b2c3d4e5f6g7h8i9j0' },
+  { id: 1, username: 'arnaaau', full_name: 'Arnau Miret', apiKey: 'b248085d65d0968c6df4384e9aa2a6fc25ccef6009acc7b1fd1c441ca86b5a5b' },
   { id: 11, username: 'nettiewelsh', full_name: 'Nettie Welsh Prod', apiKey: 'be9f7d76709421710909c3a7f2cdb2b61a075b106edab81568b00a85a65660b7' },
   { id: 3, username: 'admin', full_name: 'Admin User', apiKey: 'u1v2w3x4y5z6a7b8c9d0' },
 ];
