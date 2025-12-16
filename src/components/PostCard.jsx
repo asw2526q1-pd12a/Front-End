@@ -36,7 +36,6 @@ function PostCard({ post }) {
     url, 
     user, 
     user_id: destructuredUserId,
-    community_id,    // <-- NEW FIELD
     community_name,  // <-- NEW FIELD
 } = post;
     const user_id = destructuredUserId || user?.id;
