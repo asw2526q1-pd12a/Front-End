@@ -22,14 +22,7 @@ const PostSaveButton = ({ post }) => {
 };
 
 // Assuming you have access to your current user object via context or props
-const useCurrentUser = () => {
-    // Replace this placeholder with an actual call to your UserContext
-    return { 
-        id: 1, // Example ID 
-        username: 'currentuser', 
-        isLoggedIn: true 
-    }; 
-};
+import { useUser } from '../contexts/UserContext';
 
 // 2. --- POST CARD COMPONENT ---
 function PostCard({ post }) {
@@ -47,8 +40,8 @@ function PostCard({ post }) {
     community_name,  // <-- NEW FIELD
 } = post;
     const user_id = destructuredUserId || user?.id;
-    const currentUser = useCurrentUser();
-    const isLoggedIn = currentUser?.isLoggedIn;
+    const { user: currentUser } = useUser();
+    const isLoggedIn = !!currentUser;
     
     // --- Voting Logic Placeholders ---
     // These functions would make the API calls to upvote/downvote
