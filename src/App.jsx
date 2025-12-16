@@ -12,8 +12,6 @@ import UserSelector from './components/UserSelector'
 import ProfilePage from './pages/ProfilePage'
 import PostShow from './pages/PostShow' // <-- 1. Import your new page
 import PostEditPage from './pages/PostEditPage';
-import PostNewPage from './pages/PostNewPage';
-import HomePage from './pages/HomePage';
 
 function App() {
   return (
@@ -35,8 +33,6 @@ function App() {
                 <Route path="/" element={<ProfilePage />} /> 
                 <Route path="/posts/:id" element={<PostShow />} /> 
                 <Route path="/posts/:id/edit" element={<PostEditPage />} />
-                <Route path="/posts/new" element={<PostNewPage />} />
-                <Route path="/home" element={<HomePage />} />
               </Routes>
             </div>
           </div>
