@@ -211,13 +211,17 @@ export default function ProfilePage() {
 
       {/* --- ACTIVITY FEED --- */}
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '12px' }}>
+        {/* Primera fila: ViewSwitch y Sorter */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
           <ViewSwitch currentView={currentView} onViewChange={handleViewChange} />
+          <Sorter type={currentView} />
+        </div>
 
-          {/* Toggle for Saved Items - Only show on own profile */}
-          {isOwnProfile && (
+        {/* Segunda fila: Toggle de guardados (solo en propio perfil) */}
+        {isOwnProfile && (
+          <div style={{ marginBottom: '20px' }}>
             <label style={{
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
               padding: '8px 12px',
@@ -228,8 +232,7 @@ export default function ProfilePage() {
               fontWeight: '600',
               color: showSavedOnly ? '#F59E0B' : '#6B7280',
               transition: 'all 0.2s',
-              border: showSavedOnly ? '2px solid #F59E0B' : '2px solid transparent',
-              whiteSpace: 'nowrap'
+              border: showSavedOnly ? '2px solid #F59E0B' : '2px solid transparent'
             }}>
               <input
                 type="checkbox"
@@ -237,12 +240,10 @@ export default function ProfilePage() {
                 onChange={(e) => setShowSavedOnly(e.target.checked)}
                 style={{ cursor: 'pointer' }}
               />
-              🔖 Solo Guardados
+              🔖 Guardados
             </label>
-          )}
-
-          <Sorter type={currentView} />
-        </div>
+          </div>
+        )}
 
         {feedLoading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Cargando actividad...</div>
