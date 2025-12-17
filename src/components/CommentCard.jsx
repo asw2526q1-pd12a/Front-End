@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { deleteComment, updateComment, upvoteComment, downvoteComment, saveComment, unsaveComment } from '../services/api';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
     const { user: currentUser } = useUser();
@@ -11,10 +11,65 @@ function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
     const [editContent, setEditContent] = useState(comment.content);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Voting and saving state
-    const [voteValue, setVoteValue] = useState(comment.user_vote_value || 0);
+    // Helper functions for localStorage persistence
+    const getVoteFromStorage = (commentId) => {
+        if (!currentUser) return 0;
+        const key = `vote_comment_${commentId}_user_${currentUser.id}`;
+        const stored = localStorage.getItem(key);
+        return stored ? parseInt(stored) : 0;
+    };
+
+    const saveVoteToStorage = (commentId, value) => {
+        if (!currentUser) return;
+        const key = `vote_comment_${commentId}_user_${currentUser.id}`;
+        if (value === 0) {
+            localStorage.removeItem(key);
+        } else {
+            localStorage.setItem(key, value.toString());
+        }
+    };
+
+    const getSaveFromStorage = (commentId) => {
+        if (!currentUser) return false;
+        const key = `save_comment_${commentId}_user_${currentUser.id}`;
+        return localStorage.getItem(key) === 'true';
+    };
+
+    const saveSaveToStorage = (commentId, value) => {
+        if (!currentUser) return;
+        const key = `save_comment_${commentId}_user_${currentUser.id}`;
+        if (value) {
+            localStorage.setItem(key, 'true');
+        } else {
+            localStorage.removeItem(key);
+        }
+    };
+
+    // Initialize state from localStorage or props (localStorage takes precedence)
+    const [voteValue, setVoteValue] = useState(() => {
+        const storedVote = getVoteFromStorage(comment.id);
+        return storedVote !== 0 ? storedVote : (comment.user_vote_value || 0);
+    });
     const [score, setScore] = useState(comment.score || 0);
-    const [isSaved, setIsSaved] = useState(comment.is_saved || false);
+    const [isSaved, setIsSaved] = useState(() => {
+        const storedSave = getSaveFromStorage(comment.id);
+        return storedSave || (comment.is_saved || false);
+    });
+
+    // Update state when comment data changes (after refresh)
+    useEffect(() => {
+        // Only update from props if localStorage doesn't have a value
+        const storedVote = getVoteFromStorage(comment.id);
+        if (storedVote === 0 && comment.user_vote_value !== undefined) {
+            setVoteValue(comment.user_vote_value);
+        }
+        setScore(comment.score || 0);
+
+        const storedSave = getSaveFromStorage(comment.id);
+        if (!storedSave && comment.is_saved !== undefined) {
+            setIsSaved(comment.is_saved);
+        }
+    }, [comment.user_vote_value, comment.score, comment.is_saved, comment.id, currentUser]);
 
     const isOwner = currentUser && comment.user && currentUser.id === comment.user.id;
 
@@ -53,7 +108,7 @@ function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
         }
     };
 
-    // Voting handlers with rollback on error
+    // Voting handlers with rollback on error and localStorage persistence
     const handleUpvote = async () => {
         if (!currentUser) {
             alert("Debes iniciar sesión para votar.");
@@ -77,12 +132,18 @@ function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
 
         setVoteValue(newVote);
         setScore(newScore);
+        saveVoteToStorage(comment.id, newVote);
 
         try {
             await upvoteComment(comment.id);
+            // Refresh comment data from backend
+            if (onCommentUpdated) {
+                setTimeout(() => onCommentUpdated(), 500);
+            }
         } catch (error) {
             setVoteValue(previousVote);
             setScore(previousScore);
+            saveVoteToStorage(comment.id, previousVote);
             console.error("Error upvoting comment:", error);
             alert("Error al votar el comentario. Por favor, inténtalo de nuevo.");
         }
@@ -111,12 +172,18 @@ function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
 
         setVoteValue(newVote);
         setScore(newScore);
+        saveVoteToStorage(comment.id, newVote);
 
         try {
             await downvoteComment(comment.id);
+            // Refresh comment data from backend
+            if (onCommentUpdated) {
+                setTimeout(() => onCommentUpdated(), 500);
+            }
         } catch (error) {
             setVoteValue(previousVote);
             setScore(previousScore);
+            saveVoteToStorage(comment.id, previousVote);
             console.error("Error downvoting comment:", error);
             alert("Error al votar el comentario. Por favor, inténtalo de nuevo.");
         }
@@ -129,7 +196,9 @@ function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
         }
 
         const previousSaved = isSaved;
-        setIsSaved(!isSaved);
+        const newSaved = !isSaved;
+        setIsSaved(newSaved);
+        saveSaveToStorage(comment.id, newSaved);
 
         try {
             if (previousSaved) {
@@ -139,6 +208,7 @@ function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
             }
         } catch (error) {
             setIsSaved(previousSaved);
+            saveSaveToStorage(comment.id, previousSaved);
             console.error("Error toggling save:", error);
             alert("Error al guardar/des-guardar el comentario. Por favor, inténtalo de nuevo.");
         }
@@ -246,31 +316,6 @@ function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
 
                     {/* Barra de acciones */}
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                        {/* Save button */}
-                        {currentUser && (
-                            <button
-                                onClick={handleToggleSave}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    fontSize: '12px',
-                                    fontWeight: '600',
-                                    color: isSaved ? '#F59E0B' : '#6B7280',
-                                    background: 'none',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    padding: '4px 6px',
-                                    borderRadius: '4px'
-                                }}
-                                onMouseOver={e => e.currentTarget.style.backgroundColor = '#FEF3C7'}
-                                onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                                title={isSaved ? "Guardado" : "Guardar"}
-                            >
-                                🔖 {isSaved ? 'Guardado' : 'Guardar'}
-                            </button>
-                        )}
-
                         {/* Reply button */}
                         <button
                             onClick={handleReplyClick}
@@ -337,6 +382,32 @@ function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
                                     🗑️ Eliminar
                                 </button>
                             </>
+                        )}
+
+                        {/* Save button - moved to the right */}
+                        {currentUser && (
+                            <button
+                                onClick={handleToggleSave}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: isSaved ? '#F59E0B' : '#6B7280',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: '4px 6px',
+                                    borderRadius: '4px',
+                                    marginLeft: 'auto'
+                                }}
+                                onMouseOver={e => e.currentTarget.style.backgroundColor = '#FEF3C7'}
+                                onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                                title={isSaved ? "Guardado" : "Guardar"}
+                            >
+                                🔖 {isSaved ? 'Guardado' : 'Guardar'}
+                            </button>
                         )}
                     </div>
                 </div>
