@@ -22,11 +22,6 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [imageError, setImageError] = useState(false);
-  
-  // Feed Data State
-  const [feedItems, setFeedItems] = useState([]);
-  const [feedLoading, setFeedLoading] = useState(false);
-  const [feedError, setFeedError] = useState(null);
 
   // Feed Data State
   const [feedItems, setFeedItems] = useState([]);
