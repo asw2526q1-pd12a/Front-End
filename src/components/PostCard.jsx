@@ -2,23 +2,61 @@ import React, { useState } from 'react';
 import { API_BASE_URL } from '../services/api';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types'; // Best practice for component props
-import { upvotePost as apiUpvotePost, downvotePost as apiDownvotePost } from '../services/api';
+import { upvotePost as apiUpvotePost, downvotePost as apiDownvotePost, savePost, unsavePost } from '../services/api';
 import { useUser } from '../contexts/UserContext';
 
 // 1. --- PLACEHOLDER COMPONENTS & HOOKS ---
 // In a real app, these would be separate, functional components/hooks
 const PostSaveButton = ({ post }) => {
-    // This is where you would put the API logic to save/unsave the post
-    // For now, let's make this dynamic to use the variable:
-    const isSaved = false; // Replace with actual state (e.g., useState or context lookup)
+    const [isSaved, setIsSaved] = useState(post.is_saved || false);
+    const [loading, setLoading] = useState(false);
+
+    React.useEffect(() => {
+        setIsSaved(post.is_saved || false);
+    }, [post.id, post.is_saved]);
+
+    const handleSaveToggle = async () => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            if (isSaved) {
+                // If already saved, call the delete/unsave endpoint
+                await unsavePost(post.id);
+                setIsSaved(false);
+            } else {
+                // If not saved, call the post/save endpoint
+                await savePost(post.id);
+                setIsSaved(true);
+            }
+        } catch (error) {
+            console.error("Error toggling save:", error);
+            alert("No se pudo guardar/eliminar el post.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <button 
-            className="save-button" 
-            onClick={() => console.log(`Save/Unsave post ${post.id}`)}
+            className={`save-button ${isSaved ? 'saved' : ''}`} 
+            onClick={handleSaveToggle}
+            disabled={loading}
+            style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: isSaved ? '#ff4500' : '#878a8c', // Reddit-style orange when saved
+                fontWeight: isSaved ? 'bold' : 'normal',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+            }}
         >
-            {/* USE the variable here */}
-            {isSaved ? 'Unsave' : 'Save'} 
+            <svg width="18" height="18" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            {isSaved ? 'Guardado' : 'Guardar'} 
         </button>
     );
 };
