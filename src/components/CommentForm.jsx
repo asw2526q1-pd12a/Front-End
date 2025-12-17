@@ -72,7 +72,7 @@ function CommentForm({ post, replyingTo, onCancelReply, onCommentPosted }) {
                             name="content"
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
-                            placeholder="En que estas pensando?"
+                            placeholder="En qué estás pensando?"
                             disabled={isSubmitting}
                             required
                             style={{ 
