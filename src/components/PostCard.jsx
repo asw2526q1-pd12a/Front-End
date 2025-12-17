@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { API_BASE_URL } from '../services/api';
-import { Link } from 'react-router-dom';
+// src/components/PostCard.jsx
+import { API_BASE_URL, deletePost } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types'; // Best practice for component props
 import { upvotePost as apiUpvotePost, downvotePost as apiDownvotePost, savePost, unsavePost } from '../services/api';
 import { useUser } from '../contexts/UserContext';
@@ -63,7 +64,6 @@ const PostSaveButton = ({ post }) => {
 
 // 2. --- POST CARD COMPONENT ---
 function PostCard({ post }) {
-    // Destructure properties from the post object for cleaner code
     const { 
     id, 
     title, 
@@ -150,12 +150,11 @@ function PostCard({ post }) {
     const commentsUrl = `/posts/${id}/comments`; // Assuming this route exists
 
     // Helper for truncating content (JSX equivalent of post.content.truncate(120))
-    const truncatedContent = content?.length > 120 ? content.substring(0, 120) + '...' : content;
+    const truncatedContent = content?.length > 150 ? content.substring(0, 150) + '...' : content;
     
     // Helper for safe URL handling
     const safeUrl = url && (url.startsWith('http') ? url : `http://${url}`);
     
-    // Helper for image handling: Using 'image_url' as seen in PostEditPage
     const imageThumbnailUrl = post.image_url 
         ? (post.image_url.startsWith('http') 
             ? post.image_url 
@@ -174,12 +173,34 @@ function PostCard({ post }) {
         border: 'none', 
         padding: 0, 
         color: userVoteStatus === -1 ? '#7e0000ff' : '#30353fff' 
+    // --- NUEVA FUNCIÓN DE ELIMINAR ---
+    const handleDelete = async () => {
+        if (window.confirm("¿Estás seguro de que quieres eliminar esta publicación? Esta acción no se puede deshacer.")) {
+            try {
+                await deletePost(id);
+                // Recargamos la página para reflejar el cambio (en una app real usaríamos un callback para actualizar el estado del padre)
+                window.location.reload(); 
+            } catch (error) {
+                console.error("Error eliminando el post:", error);
+                alert("Hubo un error al eliminar la publicación.");
+            }
+        }
     };
 
     return (
-        <div className="post-card">
-            
-            {/* LEFT SECTION: Voting Box */}
+        <div style={{
+            display: 'flex',
+            backgroundColor: '#F5F8FF',
+            borderRadius: '12px',
+            border: '1px solid #E0E7FF',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+            overflow: 'hidden',
+            transition: 'box-shadow 0.2s',
+        }}
+        onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'}
+        onMouseOut={(e) => e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)'}
+        >
+            {/* 1. Columna de Votos */}
             <div className="voting-box">
                 
                 {/* UPVOTE BUTTON */}
@@ -203,142 +224,135 @@ function PostCard({ post }) {
                 </button>
             </div>
 
-            {/* MIDDLE SECTION: Image/Link */}
-            {/* Check if API returned an image URL */}
-            {imageThumbnailUrl ? (
-                // Replaced link_to image_tag with <Link> and <img>
-                <Link to={postDetailUrl} className="post-image-link"> 
-                    <img src={imageThumbnailUrl} alt={title} />
-                </Link>
-            ) : (
-                <div 
-                    className="post-image-link" 
-                    data-link={url || ""} // Data attributes in JSX
-                >
-                    {/* Placeholder if no image */}
-                    <svg className="placeholder-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-12 0h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                </div>
-            )}
-            
-            {/* RIGHT SECTION: Content and Actions */}
-            <div className="post-content-section">
-                
-                {isLoggedIn && (
-                    <div className="save-button-wrapper">
-                        {/* Replaced render '/saves/save_button' with a React component */}
-                        <PostSaveButton post={post} /> 
+            {/* 2. Columna de Imagen */}
+            <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                paddingLeft: '16px',
+                paddingTop: '16px',
+                paddingBottom: '16px'
+            }}>
+                <Link to={`/posts/${id}`} style={{ flexShrink: 0 }}>
+                    <div style={{
+                        width: '100px',
+                        height: '80px',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        border: '1px solid #D1D5DB',
+                        backgroundColor: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        {imageThumbnailUrl ? (
+                            <img 
+                                src={imageThumbnailUrl} 
+                                alt={title} 
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                        ) : (
+                            <div style={{ color: '#9CA3AF' }}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                            </div>
+                        )}
                     </div>
-                )}
+                </Link>
+            </div>
+
+            {/* 3. Columna de Contenido Principal */}
+            <div style={{ padding: '16px', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 
-                {/* WRAP THE TITLE WITH THE LINK */}
-                <h3 className="post-title">
-                    {/* Replaced link_to with <Link> */}
-                    <Link to={postDetailUrl}>{title}</Link> 
-                </h3>
-                
-                <p className="post-meta">
-                    Publicado por
-                    {/* Link to user profile */}
-                    <Link to={userProfileUrl} className="post-author-link"> 
-                        {user.username} 
+                {/* Meta Header */}
+                <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    {community_name && (
+                        <>
+                            <Link to={`/c/${community_name}`} style={{ fontWeight: '700', color: '#111827', textDecoration: 'none' }}>
+                                {community_name}
+                            </Link>
+                            <span>•</span>
+                        </>
+                    )}
+                    <span>publicado por</span>
+                    <Link to={`/users/${user?.id}`} style={{ color: '#6B7280', textDecoration: 'none' }}>
+                        {user?.username}
                     </Link>
+                </div>
+
+                {/* Título y Contenido */}
+                <Link to={`/posts/${id}`} style={{ textDecoration: 'none', color: '#111827' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: '600', margin: '0 0 6px 0', lineHeight: '1.4' }}>
+                        {title}
+                    </h3>
+                </Link>
                 
-                    en 
-                    {/* Link to community page */}
-                    <Link to={communityUrl} className="post-community-link"> 
-                        {community_name} 
-                    </Link>
-                </p>
-                
-                {content && ( // Conditional rendering if content exists
-                    <p style={{ fontSize: '14px', marginTop: '10px' }}>
+                {content && (
+                    <p style={{ fontSize: '14px', color: '#4B5563', lineHeight: '1.5', margin: '0 0 8px 0' }}>
                         {truncatedContent}
                     </p>
                 )}
-
-                <div className="post-actions">
-                    {/* Link to comments section */}
-                    <a href={commentsUrl} className="action-button"> 
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ marginRight: '5px' }} xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-                        {comments_count} Comentarios
+                
+                {/* External Link */}
+                {url && (
+                    <a href={url} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#3B82F6', marginBottom: '8px', display: 'inline-block', textDecoration: 'none' }}>
+                        🔗 {url.replace(/(^\w+:|^)\/\//, '').substring(0, 30)}...
                     </a>
-                  
-                    {/* External Link Button */}
-                    {url && (
-                        <a href={safeUrl} target="_blank" rel="noopener noreferrer" className="action-button clickable-override">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ marginRight: '5px' }} xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.815l-1.554 1.553m0 0L5.63 18.064m1.102-1.101a4 4 0 005.656 0l4-4a4 4 0 10-5.656-5.656l-1.102 1.101z"></path></svg>
-                            View Link
-                        </a>
-                    )}
-                    
-                    {/* Edit and Delete Buttons (Visible only to post author) */}
-                    {isLoggedIn && currentUser.id === user_id && (
+                )}
+
+                {/* Footer de Acciones */}
+                <div style={{ display: 'flex', gap: '15px', marginTop: 'auto', alignItems: 'center' }}>
+                    <Link to={`/posts/${id}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#6B7280', textDecoration: 'none', padding: '4px 8px', borderRadius: '4px' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#E0E7FF'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                        💬 {comments_count} Comentarios
+                    </Link>
+
+                    {isLoggedIn && currentUser.id === post.user.id && (
                         <>
-                            <Link to={`/posts/${id}/edit`} 
-                                className="nav-button" 
-                                style={{ 
-                                    fontSize: '0.75em', 
-                                    padding: '4px 8px', 
-                                    backgroundColor: '#4da6ff', 
-                                    color: 'white', 
-                                    border: 'none', 
-                                    borderRadius: '4px', 
-                                    cursor: 'pointer', 
-                                    textDecoration: 'none', 
-                                    marginRight: '0px' 
-                                }}
-                            >
-                                Editar
-                            </Link> 
+                            <Link to={`/posts/${id}/edit`} style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280', textDecoration: 'none', padding: '4px 8px' }}>
+                                ✏️ Editar
+                            </Link>
                             
-                            {/* Deletion needs a dedicated React function */}
+                            {/* --- BOTÓN ELIMINAR (NUEVO) --- */}
                             <button 
-                                onClick={() => {
-                                    if (window.confirm("Segur@ que quiere eliminar esta publicacion?")) {
-                                        // TODO: Implement Axios DELETE call here
-                                        console.log(`DELETING post ${id}`);
-                                    }
-                                }}
-                                className="nav-button" 
+                                onClick={handleDelete}
                                 style={{ 
-                                    fontSize: '0.75em', 
-                                    padding: '4px 8px', 
-                                    backgroundColor: '#dc2626', 
-                                    color: 'white', 
-                                    border: 'none', 
-                                    borderRadius: '4px', 
+                                    fontSize: '12px', 
+                                    fontWeight: '600', 
+                                    color: '#EF4444', // Rojo
+                                    textDecoration: 'none', 
+                                    padding: '4px 8px',
+                                    background: 'none',
+                                    border: 'none',
                                     cursor: 'pointer'
                                 }}
+                                onMouseOver={e => e.currentTarget.style.backgroundColor = '#FEF2F2'} // Rojo muy suave al hover
+                                onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
                             >
-                                Eliminar
-                            </button> 
+                                🗑️ Eliminar
+                            </button>
                         </>
                     )}
+                    
+                    <button 
+                        style={{ 
+                            marginLeft: 'auto', 
+                            display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#6B7280', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px' 
+                        }} 
+                        onMouseOver={e => e.currentTarget.style.backgroundColor = '#E0E7FF'} 
+                        onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                        🔖 Guardar
+                    </button>
                 </div>
             </div>
         </div>
     );
 }
 
-// 3. --- PROPS VALIDATION (Best Practice) ---
 PostCard.propTypes = {
-    post: PropTypes.shape({
-        id: PropTypes.number.isRequired,
-        title: PropTypes.string.isRequired,
-        content: PropTypes.string,
-        score: PropTypes.number.isRequired,
-        comments_count: PropTypes.number.isRequired,
-        url: PropTypes.string,
-        user_id: PropTypes.number.isRequired,
-        // Assuming your API returns nested user and community objects
-        user: PropTypes.shape({
-            id: PropTypes.number.isRequired,
-            username: PropTypes.string.isRequired,
-        }).isRequired,
-        community_id: PropTypes.number.isRequired, 
-        community_name: PropTypes.string.isRequired,
-        image_url: PropTypes.string,
-    }).isRequired,
+    post: PropTypes.object.isRequired,
 };
 
 export default PostCard;

@@ -150,6 +150,7 @@
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  padding-bottom: 120px; /* Ensure content isn't blocked by sticky footer */
 }
 
 /* Theme Toggle Button */
@@ -712,11 +713,10 @@ input[type="email"][disabled] {
 }
 
 .form-field {
-    margin: 20px; /* Reduced margin */
-    /* *** START: CHANGES FOR SIDE-BY-SIDE LAYOUT *** */
+    margin: 20px;
     display: flex;
-    align-items: center; /* Vertically align items */
-    gap: 15px; /* Space between label and input */
+    flex-direction: column;
+    gap: 8px;
     font-weight: bold;
     font-size: 15px;
     color: rgb(65, 62, 62);
@@ -724,30 +724,23 @@ input[type="email"][disabled] {
 
 .form-label {
     display: block;
-    margin-bottom: 4px; /* Reduced margin */
     font-weight: bold;
     color: #2d2e30;
-    font-size: 0.9em; /* Smaller label font */
-    /* *** START: CHANGES FOR SIDE-BY-SIDE LAYOUT *** */
-    flex-basis: 120px; /* Give the label a fixed width */
-    text-align: right; /* Align label text to the right, next to the input */
-    flex-shrink: 0; /* Prevent label from shrinking */
-    /* *** END: CHANGES FOR SIDE-BY-SIDE LAYOUT *** */
+    font-size: 0.9em;
+    text-align: left;
+    margin-bottom: 0;
 }
 
 .form-input,
 .form-select,
 .form-textarea {
     width: 100%;
-    padding: 10px; /* Reduced padding */
-    /* *** START: CHANGES FOR SIDE-BY-SIDE LAYOUT *** */
-    flex-grow: 1; /* Allow input to take up the rest of the space */
-    /* *** END: CHANGES FOR SIDE-BY-SIDE LAYOUT *** */
-    border: 1px solid #7c91b4; /* Consistent border */
-    background-color: #6690e9; /* Darker background for inputs */
+    padding: 10px;
+    border: 1px solid #7c91b4;
+    background-color: #6690e9;
     color: #000000;
-    border-radius: 4px; /* Slightly less rounded */
-    box-shadow: inset 0 1px 2px rgba(235, 234, 234, 0.2); /* Lighter inset shadow */
+    border-radius: 4px;
+    box-shadow: inset 0 1px 2px rgba(235, 234, 234, 0.2);
 }
 
 .form-input:focus,
@@ -772,15 +765,15 @@ input[type="email"][disabled] {
 }
 
 .form-field-stacked {
-    display: block; /* Overrides the flex display */
-    gap: 0;
-    margin-left: 61px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 20px;
 }
 
 .form-field-stacked .form-label {
-    flex-basis: auto; /* Remove fixed label width */
-    text-align: left; /* Align label to the left */
-    margin-bottom: 5px; /* Add space between label and textarea */
+    text-align: left;
+    margin-bottom: 0;
 }
 
 .form-submit-button {
@@ -798,19 +791,19 @@ input[type="email"][disabled] {
     box-shadow: 0 3px 6px rgba(255, 255, 255, 0.4);
 }
 
-/* New Comment line form */
+/* New Comment line form - Sticky Footer */
 
 .fixed-comment-input-container {
-    /* Make it stick to the bottom of the viewport */
     position: fixed; 
     bottom: 0;
     left: 0;
     width: 100%;
     /* Styling for visibility */
-    background-color: #7499ce; 
-    border-top: 1px solid #869dc4;
-    padding: 10px 0;
+    background-color: var(--navbar-bg); /* Use navbar bg for consistency */
+    border-top: 1px solid var(--border-color);
+    padding: 15px 0;
     z-index: 1000; /* Ensure it stays above other content */
+    margin-top: 0;
 }
 
 /* Limit the width of the content inside the container */
@@ -1313,3 +1306,123 @@ input[type="submit"].nav-button.primary-button {
 .feed-sorter-bar > form {
     margin-bottom: 0 !important;
 }
+/* -------------------- COMMENTS SECTION -------------------- */
+.comments-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.comments-list {
+    margin-top: 20px;
+}
+
+.comment-card-container {
+    margin-bottom: 15px;
+}
+
+.comment-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    margin-bottom: 0;
+    border-radius: 8px;
+    color: var(--text-color);
+}
+
+.comment-author {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.comment-content {
+    margin-bottom: 10px;
+    line-height: 1.4;
+    color: var(--text-color);
+}
+
+.comment-card small {
+    color: #6b7280;
+    font-size: 0.8em;
+}
+
+.comment-replies {
+    margin-left: 10px;
+    /* Base indent */
+    padding-left: 15px;
+    /* Space inside the border for the next level */
+    border-left: 2px solid var(--border-color);
+    /* The thread line */
+    margin-top: 10px;
+    /* Space between parent and children */
+}
+
+.comment-replies:hover {
+    border-left-color: #6b7280;
+    /* Highlight thread on hover (optional) */
+}
+
+.reply-button {
+    background: none;
+    border: none;
+    color: var(--link-color); /* Use variable for consistency */
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 0;
+    margin-left: 10px;
+    text-decoration: underline;
+}
+
+.reply-button:hover {
+    color: var(--navbar-text-hover);
+}
+
+/* Dark Mode Overrides for Comments (if not fully covered by vars) */
+:root[data-theme='dark'] .comment-card {
+    background-color: #1e1e1e;
+    border-color: #374151;
+}
+
+:root[data-theme='dark'] .comment-card small {
+    color: #9ca3af;
+}
+
+/* Link Styles */
+.comment-author-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.comment-author-link:hover {
+    text-decoration: underline;
+}
+
+/* --- Original Post Card Styling (Moved from inline) --- */
+.original-post-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* Specific overrides for Light Mode to match original look but with better contrast */
+:root:not([data-theme='dark']) .original-post-card {
+    background-color: #b7cbe7; /* Original light blue */
+    border-color: #374151; /* Dark border for contrast */
+    color: #000000;
+}
+
+.original-post-title {
+    margin-top: 0;
+    color: inherit;
+    font-size: 1.5em;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+
+

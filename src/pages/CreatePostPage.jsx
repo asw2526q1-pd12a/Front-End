@@ -200,7 +200,7 @@ function PostNewPage() {
                     </div>
 
                     {/* Submit Button (form.submit "Crear Publicación") */}
-                    <div className="form-actions" style={{ marginTop: '20px', marginLeft: '278px' }}>
+                    <div className="form-actions" style={{ marginTop: '20px',  }}>
                         <button 
                             type="submit"
                             className="nav-button create-post-button"

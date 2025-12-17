@@ -2,13 +2,12 @@
 import React, { useState } from 'react';
 import { createComment } from '../services/api';
 
-function CommentForm({ post, parentId = null }) {
+function CommentForm({ post, replyingTo, onCancelReply, onCommentPosted }) {
     const [content, setContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     
-    // --- Logic for replying to a specific user (Translates ERB logic) ---
-    // If parentId is present, you'd fetch the parent comment's user here.
-    const replyingToUser = parentId ? "Some User" : null; 
+    const parentId = replyingTo ? replyingTo.id : null;
+    const replyingToUser = replyingTo && replyingTo.user ? replyingTo.user.username : null; 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,12 +26,13 @@ function CommentForm({ post, parentId = null }) {
             const response = await createComment(post.id, { comment: commentData });
             
             console.log("Comment posted successfully:", response.data);
-            setContent(''); // Clear the form
-            // TODO: Ideally, you would refresh the post state to show the new comment
+            setContent('');// Clear the form
+            if (onCancelReply) onCancelReply(); // Reset reply state after success
+            if (onCommentPosted) onCommentPosted(); // Refresh comments list
 
         } catch (error) {
             console.error("Error posting comment:", error.response?.data || error.message);
-            alert("Failed to post comment.");
+            alert("Error al publicar el comentario.");
 
         } finally {
             setIsSubmitting(false);
@@ -48,7 +48,22 @@ function CommentForm({ post, parentId = null }) {
                     
                     {replyingToUser && (
                         <p style={{ color: '#202124ff', marginBottom: '5px' }}>
-                            Respondiendo a {replyingToUser}:
+                            Respondiendo a <strong>{replyingToUser}</strong>
+                            <button 
+                                type="button" 
+                                onClick={onCancelReply}
+                                style={{ 
+                                    background: 'none', 
+                                    border: 'none', 
+                                    color: '#ef4444', 
+                                    marginLeft: '10px', 
+                                    cursor: 'pointer',
+                                    textDecoration: 'underline',
+                                    fontSize: '0.9em'
+                                }}
+                            >
+                                Cancelar
+                            </button>
                         </p>
                     )}
 
@@ -57,7 +72,7 @@ function CommentForm({ post, parentId = null }) {
                             name="content"
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
-                            placeholder="En que estas pensando?"
+                            placeholder="En qué estás pensando?"
                             disabled={isSubmitting}
                             required
                             style={{ 
@@ -86,7 +101,7 @@ function CommentForm({ post, parentId = null }) {
                                 alignSelf: 'flex-start' 
                             }}
                         >
-                            {isSubmitting ? 'Posting...' : 'Post'}
+                            {isSubmitting ? 'Publicando...' : 'Publicar'}
                         </button>
                     </div>
                 </form>
