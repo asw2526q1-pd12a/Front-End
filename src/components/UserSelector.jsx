@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 
 const UserSelector = () => {
-  const { user, login, logout, users } = useUser();
+  const { user, login, logout, users, error, clearError } = useUser();
 
-  const handleUserChange = (e) => {
-    const userId = parseInt(e.target.value);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSelect = (userId) => {
     if (userId === -1) {
       logout();
     } else {
@@ -13,24 +15,64 @@ const UserSelector = () => {
         login(selectedUser);
       }
     }
+    setIsOpen(false);
   };
 
+  const currentUsername = user ? user.username : 'Seleccionar Usuario';
+
   return (
-    <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999, background: 'white', padding: '10px', border: '1px solid #ccc', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-      <label htmlFor="user-select" style={{ marginRight: '10px', fontWeight: 'bold' }}>Simulate User:</label>
-      <select 
-        id="user-select" 
-        value={user ? user.id : -1} 
-        onChange={handleUserChange}
-        style={{ padding: '5px' }}
+    <div className="user-selector-container custom-dropdown" style={{ position: 'relative' }}>
+      <button 
+        className="user-select-button" 
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (error) clearError();
+        }}
+        style={error ? { borderColor: '#ef4444' } : {}}
       >
-        <option value={-1}>Guest (Not Logged In)</option>
-        {users.map(u => (
-          <option key={u.id} value={u.id}>
-            {u.username} ({u.full_name})
-          </option>
-        ))}
-      </select>
+        {currentUsername}
+        <span className="dropdown-arrow">▼</span>
+      </button>
+      
+      {isOpen && (
+        <ul className="custom-options-list">
+          <li 
+            className="custom-option" 
+            onClick={() => handleSelect(-1)}
+          >
+            Seleccionar Usuario
+          </li>
+          {users.map(u => (
+            <li 
+              key={u.id} 
+              className={`custom-option ${user && user.username === u.username ? 'selected' : ''}`}
+              onClick={() => handleSelect(u.id)}
+            >
+              {u.username}
+            </li>
+          ))}
+        </ul>
+      )}
+
+       {error && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          right: 0,
+          marginTop: '5px',
+          backgroundColor: '#fee2e2',
+          border: '1px solid #f87171',
+          color: '#b91c1c',
+          padding: '8px',
+          borderRadius: '4px',
+          fontSize: '0.75rem',
+          whiteSpace: 'nowrap',
+          zIndex: 1001,
+          boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+        }}>
+          {error}
+        </div>
+      )}
     </div>
   );
 };

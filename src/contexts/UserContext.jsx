@@ -7,9 +7,10 @@ const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
 
 const MOCK_USERS = [
-  { id: 1, username: 'johndoe', full_name: 'John Doe', apiKey: 'a1b2c3d4e5f6g7h8i9j0' },
+  { id: 1, username: 'arnaaau', full_name: 'Arnau Miret', apiKey: 'b248085d65d0968c6df4384e9aa2a6fc25ccef6009acc7b1fd1c441ca86b5a5b' },
+  { id: 2, username: 'NettieWelsh', full_name: 'Nettie Welsh Dev', apiKey: '31345103e3dfaa1d16f9fdbea78b9469c70241ba0cddb7dd46098cc7ba5cbcce' },
   { id: 11, username: 'nettiewelsh', full_name: 'Nettie Welsh Prod', apiKey: 'be9f7d76709421710909c3a7f2cdb2b61a075b106edab81568b00a85a65660b7' },
-  { id: 3, username: 'admin', full_name: 'Admin User', apiKey: 'u1v2w3x4y5z6a7b8c9d0' },
+  { id: 4, username: 'andreu.corden', full_name: 'andreucordenm53a7a9', apiKey: 'a33591544877c7f2f1975fc489ab6926a3952474cc0d751097ccafd827169259'}
 ];
 
 export const UserProvider = ({ children }) => {
@@ -33,7 +34,8 @@ export const UserProvider = ({ children }) => {
       
       const response = await getCurrentUser();
       // Unwrap 'user' key if present (Rails API convention)
-      setUser(response.data.user || response.data);
+      const userData = response.data.user || response.data;
+      setUser({ ...userData, _lastRefreshed: Date.now() });
       
     } catch (err) {
       console.error("Login verification failed", err);
@@ -46,7 +48,13 @@ export const UserProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [logout]);
+  }, []);
+
+  const updateUser = useCallback((userData) => {
+    setUser(prev => ({ ...prev, ...userData, _lastRefreshed: Date.now() }));
+  }, []);
+
+  const clearError = useCallback(() => setError(null), []);
 
   // Load user from local storage or default to first mock user on init (optional)
   useEffect(() => {
@@ -57,19 +65,20 @@ export const UserProvider = ({ children }) => {
         // We attempt to verify the stored key again
         login(mockUser);
       } else {
-        // Stored key doesn't match any mock user (maybe customized?), try to fetch /me anyway?
-        // For simplicity in this scaffold, if not in mock list, we ignore it or just try /me
-        // Let's just try /me with the stored key if we wanted to support custom keys, 
-        // but here we stick to the mock logic.
-         setLoading(false);
+        // Stored key doesn't match any mock user.
+        // Fallback to default user to enforce "no guest mode"
+        localStorage.removeItem('asw_api_key');
+        login(MOCK_USERS[0]);
       }
     } else {
-      setLoading(false);
+      // No stored key found. Remain logged out (Guest state).
+      // The user must explicitly select a user to login.
+      setLoading(false); 
     }
   }, [login]);
 
   return (
-    <UserContext.Provider value={{ user, login, logout, users: MOCK_USERS, loading, error }}>
+    <UserContext.Provider value={{ user, login, logout, updateUser, clearError, users: MOCK_USERS, loading, error }}>
       {children}
     </UserContext.Provider>
   );
