@@ -1,198 +1,203 @@
+// src/pages/FeedPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { getPosts } from '../services/api';
-// Assuming these components exist in your components directory
+import { useLocation, useNavigate } from 'react-router-dom';
+import { 
+    getPosts, 
+    getSubscribedPosts, 
+    getComments, 
+    getSubscribedComments 
+} from '../services/api'; // Usamos las llamadas existentes
+
 import PostCard from '../components/PostCard'; 
+import CommentCard from '../components/CommentCard'; // Asegúrate de tener este componente o crea uno básico
 import Sorter from '../components/Sorter'; 
+import SubscribedToggle from '../components/SubscribedToggle';
+import ViewSwitch from '../components/ViewSwitch';
+import { useUser } from '../contexts/UserContext';
 
-// Assuming you have a user context (like the one we hardcoded)
-const useCurrentUser = () => {
-    // Replace with actual hook:
-    // const { currentUser } = useUser(); return currentUser;
-    return { id: 1, username: 'currentuser', isLoggedIn: true }; 
-};
-
-function HomePage() {
-    const currentUser = useCurrentUser();
-    const isLoggedIn = currentUser?.isLoggedIn;
-    
-    // Hooks for URL management
+function FeedPage() {
+    const { user } = useUser();
     const location = useLocation();
     const navigate = useNavigate();
     
-    // Get query parameters from the URL
+    // 1. Obtener estado de la URL
     const queryParams = new URLSearchParams(location.search);
     const initialQuery = queryParams.get('query') || '';
-    const initialSubscribedStatus = queryParams.get('subscribed') === 'true'; // Convert to boolean
+    const isSubscribed = queryParams.get('subscribed') === 'true';
+    const currentView = queryParams.get('view') || 'posts'; // 'posts' o 'comments'
+    const sort = queryParams.get('sort') || 'new';
 
-    // State for data
-    const [posts, setPosts] = useState([]);
+    // 2. Estado local
+    const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
-    // State for search input (controlled field)
     const [searchQuery, setSearchQuery] = useState(initialQuery);
 
-    // 1. DATA FETCHING (Runs when URL parameters change)
+    // 3. Efecto principal: Cargar datos
     useEffect(() => {
-        const fetchFeed = async () => {
+        const fetchData = async () => {
             setLoading(true);
             setError(null);
-
+            
             try {
-                const params = Object.fromEntries(new URLSearchParams(location.search));
-                const response = await getPosts(params);
-                // Assuming API returns an array of posts or { posts: [...] }
-                setPosts(response.data.posts || response.data); 
+                let response;
+
+                // LÓGICA DE SELECCIÓN DE API
+                // IMPORTANTE: Tu api.js espera getPosts(sortString), no un objeto.
+                
+                if (currentView === 'posts') {
+                    if (isSubscribed && user) {
+                        // Modo: Suscripciones
+                        response = await getSubscribedPosts(sort);
+                    } else {
+                        // Modo: Global (Aquí estaba el error, ahora llamamos correctamente)
+                        response = await getPosts(sort);
+                    }
+                } else { // currentView === 'comments'
+                    if (isSubscribed && user) {
+                        response = await getSubscribedComments(sort);
+                    } else {
+                        response = await getComments(sort);
+                    }
+                }
+                
+                // Normalizar respuesta: El backend puede devolver { posts: [] } o directamente []
+                let data = response.data.posts || response.data.comments || response.data;
+                
+                // Filtrado Cliente-Side para la búsqueda (ya que api.js getPosts solo acepta sort)
+                if (initialQuery) {
+                    const q = initialQuery.toLowerCase();
+                    data = data.filter(item => {
+                        const contentMatch = item.content && item.content.toLowerCase().includes(q);
+                        const titleMatch = item.title && item.title.toLowerCase().includes(q); // Solo posts tienen título
+                        const bodyMatch = item.body && item.body.toLowerCase().includes(q); // Comentarios suelen tener body
+                        return contentMatch || titleMatch || bodyMatch;
+                    });
+                }
+
+                setItems(data);
+
             } catch (err) {
-                console.error("Error fetching posts:", err);
-                setError("No se pudieron cargar las publicaciones.");
-                setPosts([]);
+                console.error("Error cargando feed:", err);
+                setError("No se pudieron cargar los datos.");
+                setItems([]);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchFeed();
-        // The dependency array ensures data refreshes whenever the URL changes
-    }, [location.search]); 
-    
-    
-    // 2. HANDLERS
+        fetchData();
+    }, [location.search, user]); 
 
-    // Handler for the Search input field change
-    const handleSearchInputChange = (e) => {
-        setSearchQuery(e.target.value);
-    };
+    // --- HANDLERS ---
 
-    // Handler for Search form submission
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        
-        const newParams = new URLSearchParams(location.search);
-        
-        // Update the query parameter, removing it if the input is empty
-        if (searchQuery) {
-            newParams.set('query', searchQuery);
-        } else {
-            newParams.delete('query');
-        }
-
-        // Navigate to the new URL, triggering the useEffect hook
-        navigate(`${location.pathname}?${newParams.toString()}`);
+        updateUrl({ query: searchQuery });
     };
 
-    // Handler for the Subscribed toggle switch
-    const handleSubscribedToggle = () => {
-        const newStatus = !initialSubscribedStatus;
-        
-        const newParams = new URLSearchParams(location.search);
-        
-        if (newStatus) {
-            newParams.set('subscribed', 'true');
-        } else {
-            newParams.delete('subscribed');
-        }
-
-        // Navigate to the new URL, triggering the useEffect hook
-        navigate(`${location.pathname}?${newParams.toString()}`);
+    const handleToggleSubscribed = () => {
+        if (!user) return alert("Inicia sesión para ver tus suscripciones");
+        // Toggle: Si es true lo pasamos a null (borrar param), si es null/false a 'true'
+        const newValue = isSubscribed ? null : 'true'; 
+        updateUrl({ subscribed: newValue });
     };
-    
-    const isSearchActive = initialQuery.length > 0;
+
+    const handleViewChange = (newView) => {
+        // Al cambiar de vista, reiniciamos sort a 'new' por si acaso
+        updateUrl({ view: newView, sort: 'new' });
+    };
+
+    const updateUrl = (newParams) => {
+        const params = new URLSearchParams(location.search);
+        Object.keys(newParams).forEach(key => {
+            if (newParams[key] === null || newParams[key] === '') {
+                params.delete(key);
+            } else {
+                params.set(key, newParams[key]);
+            }
+        });
+        navigate(`${location.pathname}?${params.toString()}`);
+    };
 
     return (
-        <main className="main-layout">
+        <main className="main-layout" style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
             
-            <div className="feed-column">
+            <div style={{ maxWidth: '800px', width: '100%', margin: '0 auto', padding: '20px 0' }}>
                 
-                {/* -------------------- 1. HEADER & SEARCH -------------------- */}
-                <div className="feed-header-search">
+                {/* --- HEADER: Switch de Vista y Buscador --- */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                     
-                    {/* View Toggles (Simplified: Only showing Posts view) */}
-                    <div className="view-toggles">
-                        <Link to={location.pathname + location.search} className="view-toggle-btn active-view">
-                            Publicaciones
-                        </Link>
-                        
-                        {/* Optionally add the Comments link, but it won't load data yet */}
-                        {/* <Link to={location.pathname + '?view=comments'} className="view-toggle-btn">
-                            Comentarios 
-                        </Link> */}
-                        
-                        {/* Display search results title if a query is active */}
-                        {isSearchActive && (
-                            <h2 style={{ color: '#252627ff', fontSize: '20px', marginLeft: '20px' }}>
-                                Resultados para "{initialQuery}"
-                            </h2>
-                        )}
+                    <div style={{ minWidth: '200px' }}>
+                        {/* Switch entre Posts y Comentarios */}
+                        <ViewSwitch 
+                            currentView={currentView} 
+                            onViewChange={handleViewChange} 
+                        />
                     </div>
 
-                    {/* Search Form */}
-                    <form onSubmit={handleSearchSubmit} className="search-form">
-                        <div className="search-input-wrapper">
-                            <input 
-                                type="text"
-                                name="query" 
-                                placeholder="Buscar publicación . . ." 
-                                className="search-input"
-                                value={searchQuery}
-                                onChange={handleSearchInputChange}
-                            />
-                        </div>
+                    <form onSubmit={handleSearchSubmit} style={{ width: '300px' }}>
+                        <input 
+                            type="text"
+                            placeholder={currentView === 'posts' ? "Buscar posts..." : "Buscar comentarios..."}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '10px 16px',
+                                borderRadius: '20px',
+                                border: '1px solid #E5E7EB',
+                                backgroundColor: '#F9FAFB',
+                                outline: 'none',
+                                fontSize: '14px',
+                            }}
+                        />
                     </form>
                 </div>
 
-                {/* -------------------- 2. SORTER & TOGGLE BAR -------------------- */}
-                <div className="feed-sorter-bar">
+                {/* --- BARRA DE HERRAMIENTAS: Ordenar y Toggle Suscritos --- */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     
-                    {/* Render the Sorter component (Assumes it handles its own URL logic) */}
-                    <Sorter type="posts" /> 
+                    {/* Sorter */}
+                    <Sorter type={currentView} />
 
-                    {/* Subscribed Toggle (Replaces Rails logic) */}
-                    {isLoggedIn && (
-                        <div className="d-flex align-items-center">
-                            <span className="me-3 fw-bold" style={{ color: '#252627ff' }}>Suscrito</span>
-                            <button onClick={handleSubscribedToggle} className="btn p-0" style={{ background: 'none', border: 'none' }}>
-                                <div className="form-check form-switch m-0">
-                                    <input 
-                                        className="form-check-input" 
-                                        type="checkbox" 
-                                        role="switch" 
-                                        id="postToggle" 
-                                        checked={initialSubscribedStatus}
-                                        readOnly // Handled by button onClick
-                                    />
-                                    <label className="form-check-label visually-hidden" htmlFor="postToggle">Suscrito</label>
-                                </div>
-                            </button>
-                        </div>
+                    {/* Toggle Global / Mis Suscripciones */}
+                    {user && (
+                        <SubscribedToggle 
+                            isSubscribed={isSubscribed} 
+                            onToggle={handleToggleSubscribed} 
+                        />
                     )}
                 </div>
 
-                {/* -------------------- 3. POST FEED RENDERING -------------------- */}
+                {/* --- LISTADO DE CONTENIDO --- */}
                 {loading ? (
-                    <div className="post-card" style={{ textAlign: 'center', padding: '40px' }}>
-                        <p>Cargando publicaciones...</p>
-                    </div>
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Cargando...</div>
                 ) : error ? (
-                    <div className="post-card" style={{ textAlign: 'center', padding: '40px', color: '#dc2626' }}>
-                        <p>{error}</p>
-                    </div>
-                ) : posts.length === 0 ? (
-                    <div className="post-card" style={{ textAlign: 'center', padding: '40px' }}>
-                        <p>No hay publicaciones. ¡Crea la primera!</p>
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#EF4444' }}>{error}</div>
+                ) : items.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '60px 20px', color: '#6B7280' }}>
+                        <p style={{ fontSize: '18px', fontWeight: '600' }}>No hay nada por aquí.</p>
+                        <p>Intenta cambiar los filtros o la búsqueda.</p>
                     </div>
                 ) : (
-                    <>
-                        {isSearchActive && <h3 className="search-results-header">Publicaciones</h3>}
-                        {posts.map(post => (
-                            <PostCard key={post.id} post={post} />
-                        ))}
-                    </>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {/* Renderizado condicional del componente correcto */}
+                        {currentView === 'posts' ? (
+                            items.map(post => (
+                                <PostCard key={post.id} post={post} />
+                            ))
+                        ) : (
+                            items.map(comment => (
+                                // Renderizar CommentCard (asumiendo que existe o usando div temporal)
+                                <CommentCard key={comment.id} comment={comment} />
+                            ))
+                        )}
+                    </div>
                 )}
             </div>
         </main>
     );
 }
 
-export default HomePage;
+export default FeedPage;

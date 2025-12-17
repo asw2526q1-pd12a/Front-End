@@ -83,8 +83,8 @@ export const unsubscribeCommunity = (name) =>
   api.delete(`/api/v1/communities/${name}/unsubscribe`);
 
 // --- POSTS ---
-export const getPosts = (params) => {
-  return api.get("/api/v1/posts", { params });
+export const getPosts = (sort = "new") => {
+  return api.get("/api/v1/posts", { params: { sort } });
 };
 
 export const createPost = (formData) => {
