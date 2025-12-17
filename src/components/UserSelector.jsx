@@ -45,7 +45,7 @@ const UserSelector = () => {
           {users.map(u => (
             <li 
               key={u.id} 
-              className={`custom-option ${user && user.id === u.id ? 'selected' : ''}`}
+              className={`custom-option ${user && user.username === u.username ? 'selected' : ''}`}
               onClick={() => handleSelect(u.id)}
             >
               {u.username}
