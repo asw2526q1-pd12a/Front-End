@@ -9,6 +9,19 @@ const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  const userJson = localStorage.getItem('user'); // Or however you store your user
+  if (userJson) {
+    const user = JSON.parse(userJson);
+    if (user.api_key) {
+      config.headers['X-Api-Key'] = user.api_key;
+    }
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 // Helper to set API Key
 export const setApiKey = (key) => {
   if (key) {

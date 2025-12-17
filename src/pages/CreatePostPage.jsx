@@ -1,218 +1,226 @@
+// src/pages/CreatePostPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCommunities, createPost } from '../services/api';
+import { TextInput } from '../components/ui/TextInput';
+import { FileInput } from '../components/ui/FileInput';
+import { PrimaryButton } from '../components/ui/PrimaryButton';
+import { ErrorAlert } from '../components/ui/ErrorAlert';
 
-function PostNewPage() {
-    // 1. STATE MANAGEMENT
+export default function CreatePostPage() {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        title: '',
-        url: '',
-        community_id: '', // Will store the selected community ID
-        content: '',
-        image: null,      // For file object
-    });
     
-    // State for dynamic content
+    // Estados del formulario
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [url, setUrl] = useState('');
+    const [communityId, setCommunityId] = useState('');
+    const [image, setImage] = useState(null);
+    
+    // Estados de carga y error
     const [communities, setCommunities] = useState([]);
-    const [loadingCommunities, setLoadingCommunities] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [errors, setErrors] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errors, setErrors] = useState(null); // For validation errors
 
-    // 2. FETCHING COMMUNITIES (Replaces Rails' Community.all.order(:name))
+    // 1. Cargar comunidades (Solución al error de recarga)
     useEffect(() => {
+        let isMounted = true;
         const fetchCommunities = async () => {
             try {
+                // Si el backend tarda un poco en reconocer la API Key tras F5, 
+                // esperamos un instante o simplemente reintentamos
                 const response = await getCommunities();
-                setCommunities(response.data.communities || response.data); 
+                if (isMounted) {
+                    const data = response.data.communities || response.data;
+                    setCommunities(Array.isArray(data) ? data : []);
+                    setLoading(false);
+                }
             } catch (err) {
-                console.error("Failed to load communities:", err);
-                setErrors(["Error al cargar las comunidades. Inténtalo de nuevo."]);
-            } finally {
-                setLoadingCommunities(false);
+                if (isMounted) {
+                    console.error("Error cargando comunidades:", err);
+                    // Solo mostramos error si realmente no hay comunidades cargadas
+                    setErrors(prev => [...prev, "No se pudieron cargar las comunidades."]);
+                    setLoading(false);
+                }
             }
         };
 
         fetchCommunities();
+        return () => { isMounted = false; };
     }, []);
-
-    // 3. HANDLERS
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        setFormData(prev => ({ ...prev, image: file }));
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsSubmitting(true);
-        setErrors(null);
+        setErrors([]);
         
-        // Use FormData for multipart/form-data submission (required for file uploads)
-        const data = new FormData();
-        
-        // Append all text/ID fields
-        data.append('post[title]', formData.title);
-        data.append('post[content]', formData.content);
-        data.append('post[url]', formData.url);
-        data.append('post[community_id]', formData.community_id);
-
-        // Append image file if selected
-        if (formData.image) {
-            data.append('post[image]', formData.image);
-        }
-        
-        // Check for required fields before API call
-        if (!formData.title || !formData.content || !formData.community_id) {
-            setErrors(["Título, contenido y comunidad son campos obligatorios."]);
-            setIsSubmitting(false);
+        if (!communityId) {
+            setErrors(["Debes seleccionar una comunidad."]);
             return;
         }
 
+        setIsSubmitting(true);
+        const formData = new FormData();
+        formData.append('post[title]', title);
+        formData.append('post[content]', content);
+        formData.append('post[url]', url);
+        formData.append('post[community_id]', communityId);
+        if (image) formData.append('post[image]', image);
+
         try {
-            // POST request to create the new post
-            const response = await createPost(data);
-
-            // Success: Redirect to the newly created post's detail page
-            const newPostId = response.data.post.id; // Assuming API returns the new post
-            navigate(`/posts/${newPostId}`); 
-
-        } catch (err) {
+            await createPost(formData);
+            // CORRECCIÓN 1: Redirigir al feed principal
+            navigate('/'); 
+        } catch (error) {
             setIsSubmitting(false);
-            const apiErrors = err.response?.data?.errors;
-            if (apiErrors) {
-                // Assuming API returns errors like: { title: ["can't be blank"], content: ["is too short"] }
-                // Flatten and store errors
-                setErrors(Object.values(apiErrors).flat());
+            if (error.response?.data?.errors) {
+                setErrors(error.response.data.errors);
             } else {
-                setErrors(["Error al crear la publicación. Verifica tu conexión o permisos."]);
+                setErrors(["Ocurrió un error al intentar crear la publicación."]);
             }
         }
     };
 
-    // 4. RENDERING
+    if (loading) {
+        return (
+            <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F3F4F6' }}>
+                <p style={{ color: '#6B7280' }}>Cargando...</p>
+            </main>
+        );
+    }
+
     return (
-        <div className="post-form-wrapper">
-            <div className="post-form-container">
-                <h1 className="form-title">Crea una nueva publicación</h1>
-                
-                <form onSubmit={handleSubmit} className="space-y-6">
+        <main style={{ 
+            minHeight: '100vh', 
+            backgroundColor: '#ffffff', 
+            display: 'flex',             
+            justifyContent: 'center',    
+            alignItems: 'center',        
+            padding: '20px'              
+        }}>
+            {/* CAJA CONTENEDORA MINIMALISTA (Se mantiene el estilo solicitado) */}
+            <div style={{ 
+                width: '100%', 
+                maxWidth: '550px',       
+                backgroundColor: '#ffffff', 
+                borderRadius: '16px',    
+                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', 
+                padding: '40px',
+                border: '1px solid #E5E7EB'
+            }}>
+                <div style={{ marginBottom: '30px', textAlign: 'center' }}>
+                    <h2 style={{ fontSize: '37px', fontWeight: '800', color: '#111827', marginBottom: '10px' }}>
+                        Crear Publicación
+                    </h2>
+                    <p style={{ color: '#4B5563', fontSize: '15px', margin: 0 }}>
+                        Comparte algo con la comunidad
+                    </p>
+                </div>
 
-                    {/* Error Display */}
-                    {errors && errors.length > 0 && (
-                        <div style={{ color: '#dc2626', marginBottom: '15px', padding: '10px', border: '1px solid #dc2626', borderRadius: '4px' }}>
-                            <h2 style={{ fontSize: '1em', color: 'inherit', margin: '0 0 5px 0' }}>
-                                {errors.length} {errors.length === 1 ? 'error' : 'errores'} impidieron guardar la publicación:
-                            </h2>
-                            <ul style={{ listStyle: 'disc', marginLeft: '20px' }}>
-                                {errors.map((message, index) => (
-                                    <li key={index}>{message}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                <ErrorAlert errors={errors} />
 
-                    {/* Title Field (form.text_field :title) */}
-                    <div className="form-field">
-                        <label htmlFor="title" className="form-label">Título del post:</label>
-                        <input 
-                            type="text"
-                            id="title"
-                            name="title" 
-                            placeholder="Introduce un título para tu publicación" 
-                            required 
-                            className="form-input"
-                            value={formData.title}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    {/* URL Field (form.text_field :url) */}
-                    <div className="form-field">
-                        <label htmlFor="url" className="form-label">URL:</label>
-                        <input 
-                            type="url"
-                            id="url"
-                            name="url" 
-                            placeholder="Link opcional (e.g., https://example.com)" 
-                            className="form-input"
-                            value={formData.url}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    {/* Community Selection (form.collection_select :community_id) */}
-                    <div className="form-field">
-                        <label htmlFor="community_id">Comunidad</label>
+                <form onSubmit={handleSubmit}>
+                    
+                    <div style={{ marginBottom: '25px' }}>
+                        <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                            Comunidad
+                        </label>
                         <select
-                            id="community_id"
-                            name="community_id"
-                            className="form-input"
+                            value={communityId}
+                            onChange={(e) => setCommunityId(e.target.value)}
                             required
-                            value={formData.community_id}
-                            onChange={handleInputChange}
-                            disabled={loadingCommunities}
+                            style={{
+                                width: '100%',
+                                padding: '12px 16px',
+                                borderRadius: '8px',
+                                border: '1px solid #E5E7EB',
+                                fontSize: '14px',
+                                outline: 'none',
+                                backgroundColor: '#F9FAFB',
+                                color: '#111827',
+                                cursor: 'pointer'
+                            }}
                         >
-                            {/* Replaces { prompt: "Elige una comunidad" } */}
-                            <option value="" disabled>
-                                {loadingCommunities ? 'Cargando comunidades...' : 'Elige una comunidad'}
-                            </option>
-                            
-                            {/* Map fetched communities to options */}
-                            {communities.map((community) => (
-                                <option key={community.id} value={community.id}>
-                                    {community.name}
-                                </option>
+                            <option value="">Selecciona una comunidad...</option>
+                            {communities.map((c) => (
+                                <option key={c.id} value={c.id}>c/{c.name}</option>
                             ))}
                         </select>
                     </div>
 
-                    {/* Image Selection (form.file_field :image) */}
-                    <div className="form-field">
-                        <label htmlFor="image" className="form-label">Imagen:</label>
-                        <input 
-                            type="file"
-                            id="image"
-                            name="image" 
-                            className="form-input form-file-input"
-                            accept="image/png, image/jpeg, image/gif"
-                            onChange={handleFileChange}
+                    <TextInput 
+                        label="Título"
+                        placeholder="Escribe un título..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                    />
+
+                    <TextInput 
+                        label="URL (Opcional)"
+                        placeholder="https://ejemplo.com"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                    />
+
+                    <div style={{ marginBottom: '25px' }}>
+                        <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                            Contenido
+                        </label>
+                        <textarea
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            placeholder="¿De qué quieres hablar?"
+                            rows="5"
+                            style={{
+                                width: '100%',
+                                padding: '12px 16px',
+                                borderRadius: '8px',
+                                border: '1px solid #E5E7EB',
+                                fontSize: '14px',
+                                outline: 'none',
+                                backgroundColor: '#F9FAFB',
+                                color: '#111827',
+                                resize: 'vertical',
+                                fontFamily: 'inherit'
+                            }}
                         />
                     </div>
 
-                    {/* Content Field (form.text_area :content) */}
-                    <div className="form-field form-field-stacked">
-                        <label htmlFor="content" className="form-label">Contenido:</label>
-                        <textarea 
-                            id="content"
-                            name="content"
-                            rows="6" 
-                            placeholder="Escribe el contenido de tu post aquí..." 
-                            required 
-                            className="form-input form-textarea"
-                            value={formData.content}
-                            onChange={handleInputChange}
+                    <div style={{ marginBottom: '35px' }}>
+                        <FileInput 
+                            id="post-image-upload" 
+                            label="Añadir Imagen (Opcional)" 
+                            file={image} 
+                            setFile={setImage} 
                         />
                     </div>
 
-                    {/* Submit Button (form.submit "Crear Publicación") */}
-                    <div className="form-actions" style={{ marginTop: '20px', marginLeft: '278px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <PrimaryButton type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? 'Publicando...' : 'Publicar'}
+                        </PrimaryButton>
+                        
                         <button 
-                            type="submit"
-                            className="nav-button create-post-button"
-                            disabled={isSubmitting}
+                            type="button"
+                            onClick={() => navigate(-1)}
+                            style={{
+                                width: '100%',
+                                backgroundColor: 'transparent',
+                                color: '#6B7280',
+                                fontWeight: '600',
+                                padding: '10px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                textDecoration: 'underline'
+                            }}
                         >
-                            {isSubmitting ? 'Creando...' : 'Crear Publicación'}
+                            Cancelar
                         </button>
                     </div>
                 </form>
             </div>
-        </div>
+        </main>
     );
 }
-
-export default PostNewPage;
