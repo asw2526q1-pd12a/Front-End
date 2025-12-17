@@ -146,7 +146,7 @@ function HomePage() {
                 <div className="feed-sorter-bar">
                     
                     {/* Render the Sorter component (Assumes it handles its own URL logic) */}
-                    <Sorter /> 
+                    <Sorter type="posts" /> 
 
                     {/* Subscribed Toggle (Replaces Rails logic) */}
                     {isLoggedIn && (

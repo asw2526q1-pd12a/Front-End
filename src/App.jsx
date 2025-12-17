@@ -10,7 +10,7 @@ import './App.css'
 import { UserProvider } from './contexts/UserContext'
 import ProfilePage from './pages/ProfilePage'
 import EditProfilePage from './pages/EditProfilePage';
-import PostShow from './pages/PostShow' // <-- 1. Import your new page
+import PostShow from './pages/PostShow'
 import PostEditPage from './pages/PostEditPage';
 
 function App() {
@@ -33,6 +33,7 @@ function App() {
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/users/:userId" element={<ProfilePage />} />
                 <Route path="/posts/:id" element={<PostShow />} /> 
+                <Route path="/posts/:id/comments" element={<PostShow />} /> 
                 <Route path="/posts/:id/edit" element={<PostEditPage />} />
               </Routes>
             </div>
