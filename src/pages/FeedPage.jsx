@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { getPosts } from '../services/api';
 // Assuming these components exist in your components directory
 import PostCard from '../components/PostCard'; 
 import Sorter from '../components/Sorter'; 
@@ -40,9 +40,8 @@ function HomePage() {
             setError(null);
 
             try {
-                const response = await axios.get('/api/v1/posts', {
-                    params: Object.fromEntries(new URLSearchParams(location.search)),
-                });
+                const params = Object.fromEntries(new URLSearchParams(location.search));
+                const response = await getPosts(params);
                 // Assuming API returns an array of posts or { posts: [...] }
                 setPosts(response.data.posts || response.data); 
             } catch (err) {
@@ -147,7 +146,7 @@ function HomePage() {
                 <div className="feed-sorter-bar">
                     
                     {/* Render the Sorter component (Assumes it handles its own URL logic) */}
-                    <Sorter /> 
+                    <Sorter type="posts" /> 
 
                     {/* Subscribed Toggle (Replaces Rails logic) */}
                     {isLoggedIn && (

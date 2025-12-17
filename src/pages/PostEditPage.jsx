@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { getPost, updatePost, API_BASE_URL } from '../services/api';
 import PropTypes from 'prop-types'; // Used for PostEditPage's prop-like post structure
 
 function PostEditPage() {
@@ -25,7 +25,7 @@ function PostEditPage() {
     useEffect(() => {
         const fetchPostData = async () => {
             try {
-                const response = await axios.get(`/api/v1/posts/${id}`);
+                const response = await getPost(id);
                 const post = response.data.post; // Access the nested 'post' key (from previous fix)
 
                 setFormData({
@@ -33,7 +33,9 @@ function PostEditPage() {
                     content: post.content || '',
                     url: post.url || '',
                     image: null,
-                    image_preview_url: post.image_url, // Assuming API provides image_url
+                    image_preview_url: post.image_url 
+                        ? (post.image_url.startsWith('http') ? post.image_url : `${API_BASE_URL}${post.image_url}`)
+                        : null,
                 });
                 setLoading(false);
             } catch (err) {
@@ -83,12 +85,7 @@ function PostEditPage() {
 
         try {
             // Use PUT/PATCH for updating, essential for Rails API updates
-            await axios.patch(`/api/v1/posts/${id}`, data, {
-                headers: {
-                    // Critical for file uploads
-                    'Content-Type': 'multipart/form-data', 
-                },
-            });
+            await updatePost(id, data);
 
             // Success: Redirect to the post's detail page
             navigate(`/posts/${id}`); 

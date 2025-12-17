@@ -1,6 +1,8 @@
 import React from 'react';
+import { API_BASE_URL } from '../services/api';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types'; // Best practice for component props
+import axios from 'axios';
 
 // 1. --- PLACEHOLDER COMPONENTS & HOOKS ---
 // In a real app, these would be separate, functional components/hooks
@@ -21,14 +23,7 @@ const PostSaveButton = ({ post }) => {
 };
 
 // Assuming you have access to your current user object via context or props
-const useCurrentUser = () => {
-    // Replace this placeholder with an actual call to your UserContext
-    return { 
-        id: 1, // Example ID 
-        username: 'currentuser', 
-        isLoggedIn: true 
-    }; 
-};
+import { useUser } from '../contexts/UserContext';
 
 // 2. --- POST CARD COMPONENT ---
 function PostCard({ post }) {
@@ -41,17 +36,58 @@ function PostCard({ post }) {
     comments_count, 
     url, 
     user, 
-    user_id,
-    community_id,    // <-- NEW FIELD
+    user_id: destructuredUserId,
     community_name,  // <-- NEW FIELD
 } = post;
-    const currentUser = useCurrentUser();
-    const isLoggedIn = currentUser?.isLoggedIn;
+    const user_id = destructuredUserId || user?.id;
+    const { user: currentUser } = useUser();
+    const isLoggedIn = !!currentUser;
     
     // --- Voting Logic Placeholders ---
     // These functions would make the API calls to upvote/downvote
-    const handleUpvote = () => console.log(`Upvoting post ${id}`);
-    const handleDownvote = () => console.log(`Downvoting post ${id}`);
+    const upvotePost = async () => {
+        if (!isLoggedIn) {
+            alert("Debes iniciar sesión para votar.");
+            return; // Stop execution if not authenticated
+        }
+
+        try {
+            await axios.post(`/api/v1/posts/${id}/upvote`);
+            
+            // OPTIONAL: Add some visual feedback here (e.g., console.log, temporary success message)
+            console.log(`Upvote successful for post ID: ${id}`);
+            
+            // NOTE: To update the score visually, the page/feed must be reloaded
+            // or you must manually update state (the complex code you wanted to avoid).
+
+        } catch (error) {
+            console.error("Upvote failed:", error.response || error);
+            // Provide user feedback on failure
+            alert("Error al intentar votar. Revisa la consola para más detalles.");
+        }
+    };
+
+    const downvotePost = async () => {
+        if (!isLoggedIn) {
+            alert("Debes iniciar sesión para votar.");
+            return; // Stop execution if not authenticated
+        }
+
+        try {
+            await axios.post(`/api/v1/posts/${id}/downvote`);
+            
+            // OPTIONAL: Add some visual feedback here (e.g., console.log, temporary success message)
+            console.log(`Downvote successful for post ID: ${id}`);
+            
+            // NOTE: To update the score visually, the page/feed must be reloaded
+            // or you must manually update state (the complex code you wanted to avoid).
+
+        } catch (error) {
+            console.error("Downvote failed:", error.response || error);
+            // Provide user feedback on failure
+            alert("Error al intentar votar. Revisa la consola para más detalles.");
+        }
+    };
 
     // This data would typically come from the API response based on the current user's vote
     const userVoteValue = (postId) => {
@@ -64,7 +100,7 @@ function PostCard({ post }) {
     // --- Dynamic URL generation (JSX equivalent of Rails path helpers) ---
     const postDetailUrl = `/posts/${id}`; // Matches your router setup
     const userProfileUrl = `/users/${user_id}`; 
-    const communityUrl = `/communities/${community_id}`;
+    const communityUrl = `/c/${community_name}`;
     const commentsUrl = `/posts/${id}/comments`; // Assuming this route exists
 
     // Helper for truncating content (JSX equivalent of post.content.truncate(120))
@@ -73,8 +109,12 @@ function PostCard({ post }) {
     // Helper for safe URL handling
     const safeUrl = url && (url.startsWith('http') ? url : `http://${url}`);
     
-    // Helper for image handling: ASSUMING 'post.image_as_thumbnail_url' is returned by the API
-    const imageThumbnailUrl = post.image_as_thumbnail_url; 
+    // Helper for image handling: Using 'image_url' as seen in PostEditPage
+    const imageThumbnailUrl = post.image_url 
+        ? (post.image_url.startsWith('http') 
+            ? post.image_url 
+            : `${API_BASE_URL}${post.image_url}`)
+        : null; 
     
     // Convert inline styles from CSS syntax to JSX (camelCase)
     const upvoteStyle = { 
@@ -98,7 +138,7 @@ function PostCard({ post }) {
                 
                 {/* UPVOTE BUTTON */}
                 <button 
-                    onClick={handleUpvote} 
+                    onClick={upvotePost} 
                     className="vote-button upvote-button" 
                     style={upvoteStyle}
                 >
@@ -109,7 +149,7 @@ function PostCard({ post }) {
                 
                 {/* DOWNVOTE BUTTON */}
                 <button 
-                    onClick={handleDownvote} 
+                    onClick={downvotePost} 
                     className="vote-button downvote-button" 
                     style={downvoteStyle}
                 >
@@ -246,11 +286,12 @@ PostCard.propTypes = {
         user_id: PropTypes.number.isRequired,
         // Assuming your API returns nested user and community objects
         user: PropTypes.shape({
+            id: PropTypes.number.isRequired,
             username: PropTypes.string.isRequired,
         }).isRequired,
         community_id: PropTypes.number.isRequired, 
         community_name: PropTypes.string.isRequired,
-        image_as_thumbnail_url: PropTypes.string, // Assumed property from API
+        image_url: PropTypes.string,
     }).isRequired,
 };
 

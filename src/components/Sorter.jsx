@@ -5,14 +5,24 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import './Sorter.css'; // <-- Import the styles
 
 // Define the available sorting options (equivalent to Rails @sort_options)
-const SORT_OPTIONS = {
+const POST_OPTIONS = {
     new: 'Más reciente',
+    old: 'Más antiguo',
     score: 'Puntuación',
     comments: 'Más comentarios'
 };
 
-function Sorter() {
+const COMMENT_OPTIONS = {
+    new: 'Más reciente',
+    old: 'Más antiguo',
+    top: 'Puntuación'
+};
+
+function Sorter({ type = 'posts' }) {
     const [isOpen, setIsOpen] = useState(false);
+    
+    // Select options based on type
+    const SORT_OPTIONS = type === 'comments' ? COMMENT_OPTIONS : POST_OPTIONS;
     
     // Hooks for managing URL state (React Router DOM)
     const location = useLocation();
@@ -20,7 +30,8 @@ function Sorter() {
     
     // Get the current sort order from the URL query parameters
     const queryParams = new URLSearchParams(location.search);
-    const currentSortKey = queryParams.get('sort') || 'new'; // Default to 'new'
+    const defaultSort = 'new';
+    const currentSortKey = queryParams.get('sort') || defaultSort;
 
     const currentSortText = SORT_OPTIONS[currentSortKey] || 'Ordenar';
 

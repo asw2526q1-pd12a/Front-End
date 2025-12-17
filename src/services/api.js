@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -81,8 +83,8 @@ export const unsubscribeCommunity = (name) =>
   api.delete(`/api/v1/communities/${name}/unsubscribe`);
 
 // --- POSTS ---
-export const getPosts = (sort = "new") => {
-  return api.get("/api/v1/posts", { params: { sort } });
+export const getPosts = (params) => {
+  return api.get("/api/v1/posts", { params });
 };
 
 export const createPost = (formData) => {
@@ -94,7 +96,7 @@ export const createPost = (formData) => {
 export const getPost = (id) => api.get(`/api/v1/posts/${id}`);
 
 export const updatePost = (id, formData) => {
-  return api.put(`/api/v1/posts/${id}`, formData, {
+  return api.patch(`/api/v1/posts/${id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 };
@@ -149,4 +151,5 @@ export const saveComment = (id) => api.post(`/api/v1/comments/${id}/save`);
 
 export const unsaveComment = (id) => api.delete(`/api/v1/comments/${id}/save`);
 
+export { API_BASE_URL };
 export default api;
