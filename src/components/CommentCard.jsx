@@ -316,6 +316,28 @@ function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
 
                     {/* Barra de acciones */}
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        {/* Link to Post - Visible only when not in PostShow context */ }
+                        {!postId && comment.post_id && (
+                            <Link
+                                to={`/posts/${comment.post_id}`}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: '#6B7280',
+                                    textDecoration: 'none',
+                                    padding: '4px 6px',
+                                    borderRadius: '4px'
+                                }}
+                                onMouseOver={e => e.currentTarget.style.backgroundColor = '#E0E7FF'}
+                                onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                                📄 Ver Post
+                            </Link>
+                        )}
+
                         {/* Reply button */}
                         <button
                             onClick={handleReplyClick}
