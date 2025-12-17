@@ -1,8 +1,29 @@
 // src/components/PostCard.jsx
 import React from 'react';
-import { API_BASE_URL, deletePost } from '../services/api'; // Importamos deletePost
-import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
+import { API_BASE_URL, deletePost } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types'; // Best practice for component props
+import axios from 'axios';
+
+// 1. --- PLACEHOLDER COMPONENTS & HOOKS ---
+// In a real app, these would be separate, functional components/hooks
+const PostSaveButton = ({ post }) => {
+    // This is where you would put the API logic to save/unsave the post
+    // For now, let's make this dynamic to use the variable:
+    const isSaved = false; // Replace with actual state (e.g., useState or context lookup)
+
+    return (
+        <button
+            className="save-button"
+            onClick={() => console.log(`Save/Unsave post ${post.id}`)}
+        >
+            {/* USE the variable here */}
+            {isSaved ? 'Unsave' : 'Save'}
+        </button>
+    );
+};
+
+// Assuming you have access to your current user object via context or props
 import { useUser } from '../contexts/UserContext';
 //import axios from 'axios';
 
