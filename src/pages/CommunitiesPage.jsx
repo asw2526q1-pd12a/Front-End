@@ -9,7 +9,6 @@ export default function CommunitiesPage() {
     const [communities, setCommunities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchParams, setSearchParams] = useSearchParams();
-    // Nuevo estado para llevar el control real de las suscripciones
     const [subscribedIds, setSubscribedIds] = useState(new Set()); 
     const { user } = useUser();
     
@@ -20,9 +19,6 @@ export default function CommunitiesPage() {
         try {
             const apiFilter = filter === 'suscritas' ? 'subscribed' : null;
             
-            // Hacemos dos peticiones en paralelo si estamos en "Todas" y hay usuario:
-            // 1. La lista de comunidades que toca mostrar
-            // 2. La lista de MIS suscripciones para saber cuáles marcar como "Salir"
             const promises = [getCommunities(apiFilter)];
             
             if (user && filter === 'todas') {
@@ -32,12 +28,9 @@ export default function CommunitiesPage() {
             const [communitiesResponse, subscribedResponse] = await Promise.all(promises);
             setCommunities(communitiesResponse.data);
 
-            // Actualizamos el conjunto de IDs suscritos
             if (filter === 'suscritas') {
-                // Si el filtro es suscritas, todas lo están por definición
                 setSubscribedIds(new Set(communitiesResponse.data.map(c => c.id)));
             } else if (subscribedResponse) {
-                // Si estamos en todas, usamos la respuesta auxiliar
                 setSubscribedIds(new Set(subscribedResponse.data.map(c => c.id)));
             }
 
@@ -55,12 +48,9 @@ export default function CommunitiesPage() {
 
     const handleSubscribe = async (name, id) => {
         try {
-            // Actualización Optimista: Marcamos como suscrito visualmente antes de que termine la API
             setSubscribedIds(prev => new Set(prev).add(id));
             await subscribeCommunity(name);
-            // No recargamos toda la lista para mantener la fluidez, ya actualizamos el estado visual
         } catch (error) {
-            // Si falla, revertimos el cambio visual
             setSubscribedIds(prev => {
                 const newSet = new Set(prev);
                 newSet.delete(id);
@@ -72,16 +62,12 @@ export default function CommunitiesPage() {
 
     const handleUnsubscribe = async (name, id) => {
         try {
-            // Actualización Optimista
             setSubscribedIds(prev => {
                 const newSet = new Set(prev);
                 newSet.delete(id);
                 return newSet;
             });
             await unsubscribeCommunity(name);
-            
-            // Si estamos en la pestaña "Suscritas", aquí sí podríamos querer quitar la tarjeta,
-            // pero para evitar saltos bruscos, mejor dejar que el usuario recargue o cambie de pestaña.
         } catch (error) {
             setSubscribedIds(prev => new Set(prev).add(id));
             alert("Error al salir de la comunidad: " + error.message);
@@ -95,17 +81,20 @@ export default function CommunitiesPage() {
                 boxShadow: 'none', 
                 border: 'none',
                 maxWidth: '800px', 
+                width: '100%', // <--- IMPORTANTE: Asegura que la columna use todo el ancho posible (hasta 800px)
                 margin: '0 auto', 
                 padding: '20px 0' 
             }}>
                 {/* Header y Filtros */}
-                <div className="feed-header-filters">
+                <div className="feed-header-filters" style={{ width: '100%' }}>
                     <div style={{ 
                         display: 'flex', 
                         justifyContent: 'space-between', 
                         alignItems: 'center', 
-                        marginBottom: '25px' 
+                        marginBottom: '25px',
+                        width: '100%' // <--- CLAVE: Esto fuerza la separación MÁXIMA entre los hijos
                     }}>
+                        {/* GRUPO IZQUIERDA: Título + Botones Toggle */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                             <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#111827', margin: 0 }}>
                                 Comunidades
@@ -151,6 +140,7 @@ export default function CommunitiesPage() {
                             </div>
                         </div>
 
+                        {/* GRUPO DERECHA: Botón Crear */}
                         <Link 
                             to="/communities/new" 
                             style={{
@@ -190,10 +180,8 @@ export default function CommunitiesPage() {
                         <CommunityCard 
                             key={community.id}
                             community={community}
-                            // Usamos el estado local para determinar si estamos suscritos o no
                             isSubscribed={subscribedIds.has(community.id)} 
                             showSubscribeButton={!!user}
-                            // Pasamos también el ID para actualizar el estado local
                             onSubscribe={() => handleSubscribe(community.name, community.id)}
                             onUnsubscribe={() => handleUnsubscribe(community.name, community.id)}
                         />
