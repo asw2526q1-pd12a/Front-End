@@ -176,12 +176,6 @@ function PostCard({ post }) {
         }
     };
 
-    // --- Dynamic URL generation (JSX equivalent of Rails path helpers) ---
-    const postDetailUrl = `/posts/${id}`; // Matches your router setup
-    const userProfileUrl = `/users/${user_id}`;
-    const communityUrl = `/c/${community_name}`;
-    const commentsUrl = `/posts/${id}/comments`; // Assuming this route exists
-
     // Helper for truncating content (JSX equivalent of post.content.truncate(120))
     const truncatedContent = content?.length > 150 ? content.substring(0, 150) + '...' : content;
 
@@ -350,9 +344,9 @@ function PostCard({ post }) {
                 )}
 
                 {/* External Link */}
-                {url && (
-                    <a href={url} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#3B82F6', marginBottom: '8px', display: 'inline-block', textDecoration: 'none' }}>
-                        🔗 {url.replace(/(^\w+:|^)\/\//, '').substring(0, 30)}...
+                {safeUrl && (
+                    <a href={safeUrl} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#3B82F6', marginBottom: '8px', display: 'inline-block', textDecoration: 'none' }}>
+                        🔗 {safeUrl.replace(/(^\w+:|^)\/\//, '').substring(0, 30)}...
                     </a>
                 )}
 
