@@ -3,10 +3,10 @@ import React from 'react';
 
 export default function ViewSwitch({ currentView, onViewChange }) {
     return (
-        <div style={{ 
-            display: 'flex', 
-            backgroundColor: '#F3F4F6', 
-            borderRadius: '12px', 
+        <div style={{
+            display: 'flex',
+            backgroundColor: '#F3F4F6',
+            borderRadius: '12px',
             padding: '4px',
             gap: '4px'
         }}>

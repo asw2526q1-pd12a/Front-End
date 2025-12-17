@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 const POST_OPTIONS = {
     new: 'Más reciente',
     old: 'Más antiguo',
-    score: 'Top',
+    top: 'Top',
     comments: 'Polémico'
 };
 
@@ -18,7 +18,7 @@ const COMMENT_OPTIONS = {
 function Sorter({ type = 'posts' }) {
     const location = useLocation();
     const navigate = useNavigate();
-    
+
     const SORT_OPTIONS = type === 'comments' ? COMMENT_OPTIONS : POST_OPTIONS;
     const queryParams = new URLSearchParams(location.search);
     const currentSort = queryParams.get('sort') || 'new';
