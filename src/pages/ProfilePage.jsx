@@ -29,12 +29,6 @@ export default function ProfilePage() {
   const [feedError, setFeedError] = useState(null);
   const [showSavedOnly, setShowSavedOnly] = useState(false); // Toggle for saved items
 
-  // Feed Data State
-  const [feedItems, setFeedItems] = useState([]);
-  const [feedLoading, setFeedLoading] = useState(false);
-  const [feedError, setFeedError] = useState(null);
-  const [showSavedOnly, setShowSavedOnly] = useState(false); // Toggle for saved items
-
   // Determine if we are viewing our own profile or another user's
   const isOwnProfile = !userId || (currentUser && currentUser.id === parseInt(userId));
 
