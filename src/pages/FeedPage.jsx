@@ -33,6 +33,8 @@ function FeedPage() {
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState(initialQuery);
 
+    const [refreshKey, setRefreshKey] = useState(0);
+
     // 3. Efecto principal: Cargar datos
     useEffect(() => {
         const fetchData = async () => {
@@ -87,9 +89,13 @@ function FeedPage() {
         };
 
         fetchData();
-    }, [location.search, user]); 
+    }, [location.search, user, refreshKey]); 
 
     // --- HANDLERS ---
+
+    const handleUpdateItem = () => {
+        setRefreshKey(old => old + 1);
+    };
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
@@ -185,12 +191,12 @@ function FeedPage() {
                         {/* Renderizado condicional del componente correcto */}
                         {currentView === 'posts' ? (
                             items.map(post => (
-                                <PostCard key={post.id} post={post} />
+                                <PostCard key={post.id} post={post} onUpdate={handleUpdateItem}/>
                             ))
                         ) : (
                             items.map(comment => (
                                 // Renderizar CommentCard (asumiendo que existe o usando div temporal)
-                                <CommentCard key={comment.id} comment={comment} />
+                                <CommentCard key={comment.id} comment={comment} onUpdate={handleUpdateItem}/>
                             ))
                         )}
                     </div>

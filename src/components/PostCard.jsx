@@ -63,7 +63,7 @@ const PostSaveButton = ({ post }) => {
 };
 
 // 2. --- POST CARD COMPONENT ---
-function PostCard({ post }) {
+function PostCard({ post, onUpdate }) {
     const {
         id,
         title,
@@ -167,6 +167,9 @@ function PostCard({ post }) {
                 }
             }
             saveVoteToStorage(id, response.data.score);
+            if (onUpdate) {
+                onUpdate(response.data); 
+            }
         } catch (error) {
             console.error("Upvote failed:", error.response || error);
             alert("Error al intentar votar. Revisa la consola para más detalles.");
@@ -191,6 +194,9 @@ function PostCard({ post }) {
                 }
             }
             saveVoteToStorage(id, response.data.score);
+            if (onUpdate) {
+            onUpdate(response.data); 
+        }
         } catch (error) {
             console.error("Downvote failed:", error.response || error);
             alert("Error al intentar votar. Revisa la consola para más detalles.");

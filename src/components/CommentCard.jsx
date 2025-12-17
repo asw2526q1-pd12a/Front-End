@@ -5,7 +5,7 @@ import { useUser } from '../contexts/UserContext';
 import { deleteComment, updateComment, upvoteComment, downvoteComment, saveComment, unsaveComment } from '../services/api';
 import { useState, useEffect } from 'react';
 
-function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
+function CommentCard({ comment, postId, onReply, onCommentUpdated, onUpdate }) {
     const { user: currentUser } = useUser();
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
@@ -135,10 +135,13 @@ function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
         saveVoteToStorage(comment.id, newVote);
 
         try {
-            await upvoteComment(comment.id);
+            const response = await upvoteComment(comment.id);
             // Refresh comment data from backend
             if (onCommentUpdated) {
                 setTimeout(() => onCommentUpdated(), 500);
+            }
+            if (onUpdate) {
+                onUpdate(response.data); 
             }
         } catch (error) {
             setVoteValue(previousVote);
@@ -175,10 +178,13 @@ function CommentCard({ comment, postId, onReply, onCommentUpdated }) {
         saveVoteToStorage(comment.id, newVote);
 
         try {
-            await downvoteComment(comment.id);
+            const response = await downvoteComment(comment.id);
             // Refresh comment data from backend
             if (onCommentUpdated) {
                 setTimeout(() => onCommentUpdated(), 500);
+            }
+            if (onUpdate) {
+                onUpdate(response.data); 
             }
         } catch (error) {
             setVoteValue(previousVote);
