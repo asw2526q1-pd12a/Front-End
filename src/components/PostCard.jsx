@@ -1,9 +1,10 @@
 // src/components/PostCard.jsx
 import React from 'react';
-import { API_BASE_URL } from '../services/api';
+import { API_BASE_URL, deletePost } from '../services/api'; // Importamos deletePost
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useUser } from '../contexts/UserContext';
+//import axios from 'axios';
 
 function PostCard({ post }) {
     const { 
@@ -15,12 +16,25 @@ function PostCard({ post }) {
 
     const truncatedContent = content?.length > 150 ? content.substring(0, 150) + '...' : content;
     
-    // Construcción segura de URLs de imagen
     const imageThumbnailUrl = post.image_url 
         ? (post.image_url.startsWith('http') ? post.image_url : `${API_BASE_URL}${post.image_url}`)
         : null;
 
     const handleVote = (type) => console.log(`${type} post ${id}`);
+
+    // --- NUEVA FUNCIÓN DE ELIMINAR ---
+    const handleDelete = async () => {
+        if (window.confirm("¿Estás seguro de que quieres eliminar esta publicación? Esta acción no se puede deshacer.")) {
+            try {
+                await deletePost(id);
+                // Recargamos la página para reflejar el cambio (en una app real usaríamos un callback para actualizar el estado del padre)
+                window.location.reload(); 
+            } catch (error) {
+                console.error("Error eliminando el post:", error);
+                alert("Hubo un error al eliminar la publicación.");
+            }
+        }
+    };
 
     return (
         <div style={{
@@ -35,7 +49,7 @@ function PostCard({ post }) {
         onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'}
         onMouseOut={(e) => e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)'}
         >
-            {/* 1. Columna de Votos (Izquierda) */}
+            {/* 1. Columna de Votos */}
             <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -58,8 +72,7 @@ function PostCard({ post }) {
                 </button>
             </div>
 
-            {/* 2. Columna de Imagen (SIEMPRE VISIBLE) */}
-            {/* Ahora mostramos el contenedor incluso si no hay imagen, para mostrar la silueta */}
+            {/* 2. Columna de Imagen */}
             <div style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -74,7 +87,7 @@ function PostCard({ post }) {
                         borderRadius: '8px',
                         overflow: 'hidden',
                         border: '1px solid #D1D5DB',
-                        backgroundColor: '#fff', // Fondo blanco por defecto
+                        backgroundColor: '#fff',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
@@ -86,7 +99,6 @@ function PostCard({ post }) {
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                         ) : (
-                            // SILUETA DE "SIN IMAGEN"
                             <div style={{ color: '#9CA3AF' }}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -99,7 +111,7 @@ function PostCard({ post }) {
                 </Link>
             </div>
 
-            {/* 3. Columna de Contenido Principal (Derecha) */}
+            {/* 3. Columna de Contenido Principal */}
             <div style={{ padding: '16px', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 
                 {/* Meta Header */}
@@ -145,15 +157,35 @@ function PostCard({ post }) {
                     </Link>
 
                     {isLoggedIn && currentUser.id === post.user.id && (
-                        <Link to={`/posts/${id}/edit`} style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280', textDecoration: 'none', padding: '4px 8px' }}>
-                            ✏️ Editar
-                        </Link>
+                        <>
+                            <Link to={`/posts/${id}/edit`} style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280', textDecoration: 'none', padding: '4px 8px' }}>
+                                ✏️ Editar
+                            </Link>
+                            
+                            {/* --- BOTÓN ELIMINAR (NUEVO) --- */}
+                            <button 
+                                onClick={handleDelete}
+                                style={{ 
+                                    fontSize: '12px', 
+                                    fontWeight: '600', 
+                                    color: '#EF4444', // Rojo
+                                    textDecoration: 'none', 
+                                    padding: '4px 8px',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer'
+                                }}
+                                onMouseOver={e => e.currentTarget.style.backgroundColor = '#FEF2F2'} // Rojo muy suave al hover
+                                onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                                🗑️ Eliminar
+                            </button>
+                        </>
                     )}
                     
-                    {/* BOTÓN GUARDAR: MovidA A LA DERECHA (marginLeft: 'auto') */}
                     <button 
                         style={{ 
-                            marginLeft: 'auto', // Esto empuja el botón al final del contenedor flex
+                            marginLeft: 'auto', 
                             display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#6B7280', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px' 
                         }} 
                         onMouseOver={e => e.currentTarget.style.backgroundColor = '#E0E7FF'} 

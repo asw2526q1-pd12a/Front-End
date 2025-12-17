@@ -60,7 +60,7 @@ function FeedPage() {
                         response = await getComments(sort);
                     }
                 }
-
+                
                 // Normalizar respuesta: El backend puede devolver { posts: [] } o directamente []
                 let data = response.data.posts || response.data.comments || response.data;
                 
