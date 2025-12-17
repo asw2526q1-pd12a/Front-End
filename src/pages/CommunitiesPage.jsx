@@ -18,7 +18,6 @@ export default function CommunitiesPage() {
         setLoading(true);
         try {
             const apiFilter = filter === 'suscritas' ? 'subscribed' : null;
-            
             const promises = [getCommunities(apiFilter)];
             
             if (user && filter === 'todas') {
@@ -81,20 +80,19 @@ export default function CommunitiesPage() {
                 boxShadow: 'none', 
                 border: 'none',
                 maxWidth: '800px', 
-                width: '100%', // <--- IMPORTANTE: Asegura que la columna use todo el ancho posible (hasta 800px)
+                width: '100%',
                 margin: '0 auto', 
                 padding: '20px 0' 
             }}>
-                {/* Header y Filtros */}
-                <div className="feed-header-filters" style={{ width: '100%' }}>
+                {/* Header y Filtros - CORRECCIÓN: border: 'none' para quitar la línea azul */}
+                <div className="feed-header-filters" style={{ width: '100%', border: 'none', borderBottom: 'none' }}>
                     <div style={{ 
                         display: 'flex', 
                         justifyContent: 'space-between', 
                         alignItems: 'center', 
                         marginBottom: '25px',
-                        width: '100%' // <--- CLAVE: Esto fuerza la separación MÁXIMA entre los hijos
+                        width: '100%'
                     }}>
-                        {/* GRUPO IZQUIERDA: Título + Botones Toggle */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                             <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#111827', margin: 0 }}>
                                 Comunidades
@@ -140,7 +138,6 @@ export default function CommunitiesPage() {
                             </div>
                         </div>
 
-                        {/* GRUPO DERECHA: Botón Crear */}
                         <Link 
                             to="/communities/new" 
                             style={{
