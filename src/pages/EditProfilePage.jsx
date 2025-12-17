@@ -4,7 +4,7 @@ import { updateCurrentUser, deleteCurrentUser } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 export default function EditProfilePage() {
-    const { user, login, logout, updateUser } = useUser(); 
+    const { user, logout, updateUser } = useUser(); 
     const navigate = useNavigate();
     
     const [fullName, setFullName] = useState('');
