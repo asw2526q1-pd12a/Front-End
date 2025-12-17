@@ -1,20 +1,37 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '../contexts/UserContext';
-import { Link, useParams } from 'react-router-dom';
-import { getUserById } from '../services/api';
+import { Link, useParams, useLocation, useNavigate } from 'react-router-dom';
+import { getUserById, getUserPosts, getUserComments } from '../services/api'; // Added feed API methods
+import PostCard from '../components/PostCard';
+import CommentCard from '../components/CommentCard';
+import Sorter from '../components/Sorter';
+import ViewSwitch from '../components/ViewSwitch';
 
 export default function ProfilePage() {
   const { user: currentUser, loading: contextLoading, error: contextError } = useUser();
   const { userId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Feed State
+  const queryParams = new URLSearchParams(location.search);
+  const currentView = queryParams.get('view') || 'posts';
+  const sort = queryParams.get('sort') || 'new';
   
   const [profileUser, setProfileUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [imageError, setImageError] = useState(false);
+  
+  // Feed Data State
+  const [feedItems, setFeedItems] = useState([]);
+  const [feedLoading, setFeedLoading] = useState(false);
+  const [feedError, setFeedError] = useState(null);
 
   // Determine if we are viewing our own profile or another user's
   const isOwnProfile = !userId || (currentUser && currentUser.id === parseInt(userId));
 
+  // 1. Fetch User Profile
   useEffect(() => {
     // If viewing own profile (no ID in URL), we rely on UserContext
     if (!userId) {
@@ -42,7 +59,51 @@ export default function ProfilePage() {
     fetchUser();
   }, [userId, currentUser]);
 
-  // Handle loading state
+  // 2. Fetch User Feed (Posts/Comments)
+  useEffect(() => {
+    // We need a user ID to fetch their content.
+    // If it's your own profile, wait for currentUser to be available.
+    // If it's another user, wait for profileUser (fetched above) OR just use userId from params.
+    // Using profileUser is safer to ensure existence, but userId is faster if valid.
+    
+    const targetId = userId || (currentUser?.id);
+
+    if (!targetId) return;
+
+    const fetchFeed = async () => {
+        setFeedLoading(true);
+        setFeedError(null);
+        try {
+            let response;
+            if (currentView === 'posts') {
+                response = await getUserPosts(targetId, sort);
+            } else {
+                response = await getUserComments(targetId, sort);
+            }
+            // Normalize response
+            const data = response.data.posts || response.data.comments || response.data;
+            setFeedItems(data || []);
+        } catch (err) {
+            console.error("Error fetching user feed:", err);
+            setFeedError("No se pudo cargar la actividad del usuario.");
+        } finally {
+            setFeedLoading(false);
+        }
+    };
+
+    fetchFeed();
+  }, [userId, currentUser, currentView, sort]); // Refresh when any of these change
+
+
+  // --- HANDLERS ---
+  const handleViewChange = (newView) => {
+    const params = new URLSearchParams(location.search);
+    params.set('view', newView);
+    params.set('sort', 'new'); // Reset sort on view switch
+    navigate(`${location.pathname}?${params.toString()}`);
+  };
+
+  // Handle loading state for profile only (feed has its own loading)
   if (loading || (isOwnProfile && contextLoading)) return <div>Cargando perfil...</div>;
 
   // Handle error state
@@ -57,9 +118,8 @@ export default function ProfilePage() {
     )
   }
 
-  // Handle case where no user data is available yet (or guest mode which is disabled but just in case)
+  // Handle case where no user data is available yet
   if (!profileUser) {
-    // If it's own profile and we are here, it means we are logged out or context is empty
     if (isOwnProfile) {
         return (
             <div style={{ padding: '20px', textAlign: 'center' }}>
@@ -68,15 +128,15 @@ export default function ProfilePage() {
             </div>
           );
     }
-    // If explicit fetch failed or returned null
     return null; 
   }
 
   const userToDisplay = profileUser;
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', textAlign: 'left' }}>
-      <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', backgroundColor: 'var(--card-bg)', color: 'var(--text-color)' }}>
+    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', textAlign: 'left' }}>
+      {/* --- PROFILE CARD --- */}
+      <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', backgroundColor: 'var(--card-bg)', color: 'var(--text-color)', marginBottom: '30px' }}>
         {/* Banner */}
         <div style={{ height: '150px', backgroundColor: 'var(--navbar-border)', backgroundImage: userToDisplay?.banner_url ? `url(${userToDisplay.banner_url}?t=${userToDisplay._lastRefreshed})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}>
             {!userToDisplay?.banner_url && <div style={{width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', color: 'var(--navbar-text)'}}>Sin Banner</div>}
@@ -124,7 +184,6 @@ export default function ProfilePage() {
             <div>
               <strong>{userToDisplay?.comments_count || 0}</strong> Comentarios
             </div>
-            {/* Do not show email for other users (privacy) unless API allows it, usually hidden */}
             {isOwnProfile && (
                 <div>
                   <strong>{userToDisplay?.email}</strong>
@@ -136,9 +195,36 @@ export default function ProfilePage() {
             <p>ID de Usuario: {userToDisplay?.id}</p>
             <p>Miembro desde: {userToDisplay?.created_at ? new Date(userToDisplay.created_at).toLocaleDateString() : 'N/A'}</p>
           </div>
-
         </div>
       </div>
+
+      {/* --- ACTIVITY FEED --- */}
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <ViewSwitch currentView={currentView} onViewChange={handleViewChange} />
+            <Sorter type={currentView} />
+        </div>
+
+        {feedLoading ? (
+             <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Cargando actividad...</div>
+        ) : feedError ? (
+            <div style={{ textAlign: 'center', padding: '20px', color: '#EF4444' }}>{feedError}</div>
+        ) : feedItems.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280', backgroundColor: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                Este usuario no tiene {currentView === 'posts' ? 'publicaciones' : 'comentarios'} aún.
+            </div>
+        ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {currentView === 'posts' && feedItems.map(post => (
+                    <PostCard key={post.id} post={post} />
+                ))}
+                {currentView === 'comments' && feedItems.map(comment => (
+                    <CommentCard key={comment.id} comment={comment} />
+                ))}
+            </div>
+        )}
+      </div>
+
     </div>
   );
 };
