@@ -1,235 +1,184 @@
+// src/pages/PostEditPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getPost, updatePost, API_BASE_URL } from '../services/api';
-import PropTypes from 'prop-types'; // Used for PostEditPage's prop-like post structure
+import { useParams, useNavigate } from 'react-router-dom';
+import { getPost, updatePost } from '../services/api';
+import { TextInput } from '../components/ui/TextInput';
+import { FileInput } from '../components/ui/FileInput';
+import { PrimaryButton } from '../components/ui/PrimaryButton';
+import { ErrorAlert } from '../components/ui/ErrorAlert';
 
-function PostEditPage() {
-    // 1. HOOKS AND STATE
-    const { id } = useParams(); // Get post ID from URL
+export default function PostEditPage() {
+    const { id } = useParams();
     const navigate = useNavigate();
-
-    // Initial state based on your form fields
-    const [formData, setFormData] = useState({
-        title: '',
-        content: '',
-        url: '',
-        image: null, // For file upload
-        image_preview_url: null, // For displaying existing image
-    });
-
+    
+    // Estados del formulario
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [url, setUrl] = useState('');
+    const [image, setImage] = useState(null);
+    
     const [loading, setLoading] = useState(true);
-    const [errors, setErrors] = useState(null); // To store API validation errors
+    const [errors, setErrors] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // 2. DATA FETCHING (GET request to load current post data)
+    // Cargar datos iniciales
     useEffect(() => {
         const fetchPostData = async () => {
             try {
                 const response = await getPost(id);
-                const post = response.data.post; // Access the nested 'post' key (from previous fix)
-
-                setFormData({
-                    title: post.title || '',
-                    content: post.content || '',
-                    url: post.url || '',
-                    image: null,
-                    image_preview_url: post.image_url
-                        ? (post.image_url.startsWith('http') ? post.image_url : `${API_BASE_URL}${post.image_url}`)
-                        : null,
-                });
+                // Ajustamos según la estructura que devuelva tu API (usualmente response.data o response.data.post)
+                const post = response.data.post || response.data;
+                
+                setTitle(post.title || '');
+                setContent(post.content || '');
+                setUrl(post.url || '');
                 setLoading(false);
             } catch (err) {
-                console.error("Failed to fetch post for editing:", err);
-                // Handle 404 or authorization error
-                setErrors(["Failed to load post. Check authorization or ID."]);
+                setErrors(["No se pudo cargar la información de la publicación: " + (err.response?.data?.message || err.message)]);
                 setLoading(false);
             }
         };
-
         fetchPostData();
     }, [id]);
 
-    // 3. HANDLERS
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        setFormData(prev => ({ ...prev, image: file }));
-
-        // Optional: Create a temporary preview URL for the newly selected image
-        if (file) {
-            setFormData(prev => ({ ...prev, image_preview_url: URL.createObjectURL(file) }));
-        }
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrors([]);
         setIsSubmitting(true);
-        setErrors(null);
 
-        // Prepare form data for API submission (Handles file and text)
-        const data = new FormData();
-
-        // Append post fields to FormData
-        data.append('post[title]', formData.title);
-        data.append('post[content]', formData.content);
-        data.append('post[url]', formData.url);
-
-        // Append image file if a new one was selected
-        if (formData.image) {
-            data.append('post[image]', formData.image);
-        }
+        const formData = new FormData();
+        formData.append('post[title]', title);
+        formData.append('post[content]', content);
+        formData.append('post[url]', url);
+        if (image) formData.append('post[image]', image);
 
         try {
-            // Use PUT/PATCH for updating, essential for Rails API updates
-            await updatePost(id, data);
-
-            // Success: Redirect to the post's detail page
-            navigate(`/posts/${id}`);
-
-        } catch (err) {
+            await updatePost(id, formData);
+            navigate(`/posts/${id}`); 
+        } catch (error) {
             setIsSubmitting(false);
-            const apiErrors = err.response?.data?.errors;
-            if (apiErrors) {
-                // Assuming API returns errors in a standard format
-                setErrors(Object.values(apiErrors).flat());
+            if (error.response?.data?.errors) {
+                setErrors(error.response.data.errors);
             } else {
-                setErrors(["An unknown error occurred while updating the post."]);
+                setErrors(["Ocurrió un error al intentar actualizar la publicación."]);
             }
         }
     };
 
-    // 4. RENDERING
     if (loading) {
-        return <div className="post-form-wrapper" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>Loading Editor...</div>;
+        return (
+            <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F3F4F6' }}>
+                <p style={{ color: '#6B7280' }}>Cargando datos...</p>
+            </main>
+        );
     }
 
-    const imageURL = `/posts/${id}/comments`; // The cancel link destination
-
     return (
-        <div className="post-form-wrapper">
-            <div className="post-form-container">
-                <h1 className="form-title">Editar Publicación</h1>
+        <main style={{ 
+            minHeight: '100vh', 
+            backgroundColor: '#ffffff', // Fondo gris claro para resaltar la caja
+            display: 'flex',             
+            justifyContent: 'center',    // Centrado horizontal
+            alignItems: 'center',        // Centrado vertical
+            padding: '20px'              
+        }}>
+            {/* CAJA CONTENEDORA CON SOMBRA Y BORDES (Igual a CreateCommunity) */}
+            <div style={{ 
+                width: '100%', 
+                maxWidth: '550px',       
+                backgroundColor: '#ffffff', 
+                borderRadius: '16px',    
+                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', 
+                padding: '40px',
+                border: '1px solid #E5E7EB'
+            }}>
+                <div style={{ marginBottom: '30px', textAlign: 'center' }}>
+                    <h2 style={{ fontSize: '37px', fontWeight: '800', color: '#111827', marginBottom: '10px' }}>
+                        Editar publicación
+                    </h2>
+                    <p style={{ color: '#4B5563', fontSize: '15px', margin: 0 }}>
+                        Actualiza la información de tu post
+                    </p>
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <ErrorAlert errors={errors} />
 
-                    {/* Error Display */}
-                    {errors && errors.length > 0 && (
-                        <div style={{ color: '#dc2626', marginBottom: '15px', padding: '10px', border: '1px solid #dc2626', borderRadius: '4px' }}>
-                            <h2 style={{ fontSize: '1em', color: 'inherit', margin: '0 0 5px 0' }}>
-                                {errors.length} {errors.length === 1 ? 'error' : 'errores'} impidieron guardar la publicación:
-                            </h2>
-                            <ul style={{ listStyle: 'disc', marginLeft: '20px' }}>
-                                {errors.map((message, index) => (
-                                    <li key={index}>{message}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                <form onSubmit={handleSubmit}>
+                    <TextInput 
+                        label="Título"
+                        placeholder="Escribe un título..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                    />
 
-                    {/* Title Field */}
-                    <div className="form-field">
-                        <label htmlFor="title" className="form-label">Título del post:</label>
-                        <input
-                            type="text"
-                            id="title"
-                            name="title"
-                            placeholder="Introduce un título para tu publicación"
-                            required
-                            className="form-input"
-                            value={formData.title}
-                            onChange={handleInputChange}
-                        />
-                    </div>
+                    <TextInput 
+                        label="URL (Enlace externo)"
+                        placeholder="https://..."
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                    />
 
-                    {/* URL Field */}
-                    <div className="form-field">
-                        <label htmlFor="url" className="form-label">URL:</label>
-                        <input
-                            type="url"
-                            id="url"
-                            name="url"
-                            placeholder="Link opcional (e.g., https://example.com)"
-                            className="form-input"
-                            value={formData.url}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    {/* Image Field */}
-                    <div className="form-field">
-                        <label htmlFor="image" className="form-label">Imagen:</label>
-
-                        {/* Current Image Preview */}
-                        {formData.image_preview_url && (
-                            <div className="post-image-container" style={{ marginBottom: '10px' }}>
-                                <img
-                                    src={formData.image_preview_url}
-                                    alt="Current Post Image"
-                                    className="post-image"
-                                    style={{
-                                        maxWidth: '100%',
-                                        height: 'auto',
-                                        display: 'block',
-                                        borderRadius: '4px'
-                                    }}
-                                />
-                            </div>
-                        )}
-
-                        <input
-                            type="file"
-                            id="image"
-                            name="image"
-                            className="form-input form-file-input"
-                            accept="image/png, image/jpeg, image/gif"
-                            onChange={handleFileChange}
-                        />
-                    </div>
-
-                    {/* Content Field */}
-                    <div className="form-field form-field-stacked">
-                        <label htmlFor="content" className="form-label">Contenido:</label>
+                    <div style={{ marginBottom: '25px' }}>
+                        <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                            Contenido
+                        </label>
                         <textarea
-                            id="content"
-                            name="content"
-                            rows="6"
-                            placeholder="Escribe el contenido de tu post aquí..."
-                            required
-                            className="form-input form-textarea"
-                            value={formData.content}
-                            onChange={handleInputChange}
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            placeholder="Contenido de la publicación..."
+                            rows="5"
+                            style={{
+                                width: '100%',
+                                padding: '12px 16px',
+                                borderRadius: '8px',
+                                border: '1px solid #E5E7EB',
+                                fontSize: '14px',
+                                outline: 'none',
+                                backgroundColor: '#F9FAFB',
+                                color: '#111827',
+                                resize: 'vertical',
+                                fontFamily: 'inherit'
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = '#4F46E5'}
+                            onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
                         />
                     </div>
 
-                    {/* Form Actions */}
-                    <div className="form-actions" style={{ marginTop: '20px',  }}>
-                        <button
-                            type="submit"
-                            className="nav-button create-post-button"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? 'Actualizando...' : 'Actualizar Publicación'}
-                        </button>
+                    <div style={{ marginBottom: '30px' }}>
+                        <FileInput 
+                            id="edit-post-image" 
+                            label="Cambiar Imagen (Opcional)" 
+                            file={image} 
+                            setFile={setImage} 
+                        />
+                    </div>
 
-                        <Link
-                            to={imageURL}
-                            className="nav-button"
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <PrimaryButton type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? 'Guardando...' : 'Actualizar Publicación'}
+                        </PrimaryButton>
+                        
+                        <button 
+                            type="button"
+                            onClick={() => navigate(-1)}
                             style={{
-                                backgroundColor: '#d61919ff',
-                                marginLeft: '10px'
+                                width: '100%',
+                                backgroundColor: 'transparent',
+                                color: '#6B7280',
+                                fontWeight: '600',
+                                padding: '10px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                textDecoration: 'underline'
                             }}
                         >
-                            Cancelar
-                        </Link>
+                            Cancelar y volver
+                        </button>
                     </div>
                 </form>
             </div>
-        </div>
+        </main>
     );
 }
-
-export default PostEditPage;
