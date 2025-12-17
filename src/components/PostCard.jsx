@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { API_BASE_URL } from '../services/api';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types'; // Best practice for component props
-import axios from 'axios';
+import { upvotePost as apiUpvotePost, downvotePost as apiDownvotePost } from '../services/api';
+import { useUser } from '../contexts/UserContext';
 
 // 1. --- PLACEHOLDER COMPONENTS & HOOKS ---
 // In a real app, these would be separate, functional components/hooks
@@ -22,80 +23,87 @@ const PostSaveButton = ({ post }) => {
     );
 };
 
-// Assuming you have access to your current user object via context or props
-import { useUser } from '../contexts/UserContext';
-
 // 2. --- POST CARD COMPONENT ---
 function PostCard({ post }) {
     // Destructure properties from the post object for cleaner code
     const { 
     id, 
     title, 
-    content, 
-    score, 
+    content,
     comments_count, 
     url, 
     user, 
     user_id: destructuredUserId,
-    community_name,  // <-- NEW FIELD
+    community_name,
 } = post;
     const user_id = destructuredUserId || user?.id;
     const { user: currentUser } = useUser();
     const isLoggedIn = !!currentUser;
-    
+    const [currentScore, setCurrentScore] = useState(post.score);
+    const [userVoteStatus, setUserVoteStatus] = useState(post.current_user_vote);
     // --- Voting Logic Placeholders ---
     // These functions would make the API calls to upvote/downvote
     const upvotePost = async () => {
-        if (!isLoggedIn) {
-            alert("Debes iniciar sesión para votar.");
-            return; // Stop execution if not authenticated
-        }
+        if (!isLoggedIn) { alert("Debes iniciar sesión para votar."); return; }
+
+        // Determine the vote value to send: 
+        // If already upvoted (1), the next click is an unvote (0).
+        // Otherwise, it's a standard upvote (1).
+        const targetVoteValue = userVoteStatus === 1 ? 0 : 1; 
 
         try {
-            await axios.post(`/api/v1/posts/${id}/upvote`);
+            // Note: We use the dedicated API call, which simplifies the target value handling
+            // The Rails backend handles the logic based on the endpoint (/upvote or /downvote)
+            const response = await apiUpvotePost(id); 
             
-            // OPTIONAL: Add some visual feedback here (e.g., console.log, temporary success message)
-            console.log(`Upvote successful for post ID: ${id}`);
-            
-            // NOTE: To update the score visually, the page/feed must be reloaded
-            // or you must manually update state (the complex code you wanted to avoid).
-
+            if (response.data && response.data.score !== undefined) {
+                setCurrentScore(response.data.score); 
+                
+                // 🛑 CRITICAL FIX: The Rails `handle_vote_for` determines the new vote status.
+                // It should return the new vote status (0, 1, or -1) in the response data.
+                // Assuming Rails returns it as `response.data.new_vote_value` or similar.
+                
+                // If the response contains the new vote value, use that:
+                if (response.data.new_vote_value !== undefined) {
+                     setUserVoteStatus(response.data.new_vote_value);
+                } else {
+                     // FALLBACK: Since we clicked the upvote button, the new state is 1, 
+                     // unless the old state was 1 (in which case the API sets it to 0).
+                     // This is less reliable than getting the value from the server.
+                     setUserVoteStatus(targetVoteValue); 
+                }
+            }
         } catch (error) {
             console.error("Upvote failed:", error.response || error);
-            // Provide user feedback on failure
             alert("Error al intentar votar. Revisa la consola para más detalles.");
         }
     };
 
     const downvotePost = async () => {
-        if (!isLoggedIn) {
-            alert("Debes iniciar sesión para votar.");
-            return; // Stop execution if not authenticated
-        }
+        if (!isLoggedIn) { alert("Debes iniciar sesión para votar."); return; }
+
+        // Determine the vote value to send: 
+        // If already downvoted (-1), the next click is an unvote (0).
+        // Otherwise, it's a standard downvote (-1).
+        const targetVoteValue = userVoteStatus === -1 ? 0 : -1; 
 
         try {
-            await axios.post(`/api/v1/posts/${id}/downvote`);
+            const response = await apiDownvotePost(id); 
             
-            // OPTIONAL: Add some visual feedback here (e.g., console.log, temporary success message)
-            console.log(`Downvote successful for post ID: ${id}`);
-            
-            // NOTE: To update the score visually, the page/feed must be reloaded
-            // or you must manually update state (the complex code you wanted to avoid).
-
+            if (response.data && response.data.score !== undefined) {
+                setCurrentScore(response.data.score);
+                
+                if (response.data.new_vote_value !== undefined) {
+                     setUserVoteStatus(response.data.new_vote_value);
+                } else {
+                     setUserVoteStatus(targetVoteValue);
+                }
+            }
         } catch (error) {
             console.error("Downvote failed:", error.response || error);
-            // Provide user feedback on failure
             alert("Error al intentar votar. Revisa la consola para más detalles.");
         }
     };
-
-    // This data would typically come from the API response based on the current user's vote
-    const userVoteValue = (postId) => {
-    // We are using the postId variable here, even if only in a placeholder console log.
-    console.log(`Placeholder: Getting vote value for post ID ${postId}`); 
-    return 0; // Placeholder return value
-};
-    const voteValue = userVoteValue(id);
 
     // --- Dynamic URL generation (JSX equivalent of Rails path helpers) ---
     const postDetailUrl = `/posts/${id}`; // Matches your router setup
@@ -121,13 +129,13 @@ function PostCard({ post }) {
         background: 'none', 
         border: 'none', 
         padding: 0, 
-        color: voteValue === 1 ? '#0455a7ff' : '#30353fff' 
+        color: userVoteStatus === 1 ? '#0455a7ff' : '#30353fff' 
     };
     const downvoteStyle = { 
         background: 'none', 
         border: 'none', 
         padding: 0, 
-        color: voteValue === -1 ? '#7e0000ff' : '#30353fff' 
+        color: userVoteStatus === -1 ? '#7e0000ff' : '#30353fff' 
     };
 
     return (
@@ -145,7 +153,7 @@ function PostCard({ post }) {
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
                 </button>
                 
-                <span className="vote-score">{score}</span>
+                <span className="vote-score">{currentScore}</span>
                 
                 {/* DOWNVOTE BUTTON */}
                 <button 
