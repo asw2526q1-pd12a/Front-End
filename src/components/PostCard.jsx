@@ -112,6 +112,37 @@ function PostCard({ post }) {
         }
         setCurrentScore(post.score);
     }, [post.current_user_vote, post.score, id, currentUser]);
+
+    // Helper functions for save state persistence
+    const getSaveFromStorage = (postId) => {
+        if (!currentUser) return false;
+        const key = `save_post_${postId}_user_${currentUser.id}`;
+        return localStorage.getItem(key) === 'true';
+    };
+
+    const saveSaveToStorage = (postId, value) => {
+        if (!currentUser) return;
+        const key = `save_post_${postId}_user_${currentUser.id}`;
+        if (value) {
+            localStorage.setItem(key, 'true');
+        } else {
+            localStorage.removeItem(key);
+        }
+    };
+
+    // Initialize save state from localStorage or props
+    const [isSaved, setIsSaved] = useState(() => {
+        const storedSave = getSaveFromStorage(id);
+        return storedSave || (post.is_saved || false);
+    });
+
+    // Update save state when post data changes
+    useEffect(() => {
+        const storedSave = getSaveFromStorage(id);
+        if (!storedSave && post.is_saved !== undefined) {
+            setIsSaved(post.is_saved);
+        }
+    }, [post.is_saved, id, currentUser]);
     // --- Voting Logic Placeholders ---
     // These functions would make the API calls to upvote/downvote
     const upvotePost = async () => {
@@ -199,6 +230,32 @@ function PostCard({ post }) {
                 console.error("Error eliminando el post:", error);
                 alert("Hubo un error al eliminar la publicación.");
             }
+        }
+    };
+
+    // Handler for save/unsave with rollback
+    const handleToggleSave = async () => {
+        if (!currentUser) {
+            alert("Debes iniciar sesión para guardar posts.");
+            return;
+        }
+
+        const previousSaved = isSaved;
+        const newSaved = !isSaved;
+        setIsSaved(newSaved);
+        saveSaveToStorage(id, newSaved);
+
+        try {
+            if (previousSaved) {
+                await unsavePost(id);
+            } else {
+                await savePost(id);
+            }
+        } catch (error) {
+            setIsSaved(previousSaved);
+            saveSaveToStorage(id, previousSaved);
+            console.error("Error toggling save:", error);
+            alert("Error al guardar/des-guardar el post. Por favor, inténtalo de nuevo.");
         }
     };
 
@@ -384,14 +441,16 @@ function PostCard({ post }) {
                     )}
 
                     <button
+                        onClick={handleToggleSave}
                         style={{
                             marginLeft: 'auto',
-                            display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#6B7280', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px'
+                            display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: isSaved ? '#F59E0B' : '#6B7280', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px'
                         }}
-                        onMouseOver={e => e.currentTarget.style.backgroundColor = '#E0E7FF'}
+                        onMouseOver={e => e.currentTarget.style.backgroundColor = '#FEF3C7'}
                         onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                        title={isSaved ? "Guardado" : "Guardar"}
                     >
-                        🔖 Guardar
+                        🔖 {isSaved ? 'Guardado' : 'Guardar'}
                     </button>
                 </div>
             </div>
