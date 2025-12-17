@@ -18,19 +18,24 @@ export default function CommunitiesPage() {
         setLoading(true);
         try {
             const apiFilter = filter === 'suscritas' ? 'subscribed' : null;
-            const promises = [getCommunities(apiFilter)];
             
-            if (user && filter === 'todas') {
-                promises.push(getCommunities('subscribed'));
-            }
+            // 1. Cargamos la lista que se debe mostrar según el filtro
+            const response = await getCommunities(apiFilter);
+            setCommunities(response.data);
 
-            const [communitiesResponse, subscribedResponse] = await Promise.all(promises);
-            setCommunities(communitiesResponse.data);
-
-            if (filter === 'suscritas') {
-                setSubscribedIds(new Set(communitiesResponse.data.map(c => c.id)));
-            } else if (subscribedResponse) {
-                setSubscribedIds(new Set(subscribedResponse.data.map(c => c.id)));
+            // 2. Si hay usuario, obtenemos sus suscripciones reales para los botones Unirse/Salir
+            if (user) {
+                if (filter === 'suscritas') {
+                    setSubscribedIds(new Set(response.data.map(c => c.id)));
+                } else {
+                    // Cargamos suscripciones en segundo plano sin bloquear si falla (ej. 404)
+                    try {
+                        const subResp = await getCommunities('subscribed');
+                        setSubscribedIds(new Set(subResp.data.map(c => c.id)));
+                    } catch (subError) {
+                        setSubscribedIds(new Set()); // No hay suscripciones, no pasa nada
+                    }
+                }
             }
 
         } catch (error) {
@@ -84,8 +89,13 @@ export default function CommunitiesPage() {
                 margin: '0 auto', 
                 padding: '20px 0' 
             }}>
-                {/* Header y Filtros - CORRECCIÓN: border: 'none' para quitar la línea azul */}
-                <div className="feed-header-filters" style={{ width: '100%', border: 'none', borderBottom: 'none' }}>
+                {/* --- HEADER SIN LÍNEAS ( border: 'none' y borderBottom: 'none' ) --- */}
+                <div className="feed-header-filters" style={{ 
+                    width: '100%', 
+                    border: 'none', 
+                    borderBottom: 'none', 
+                    boxShadow: 'none' 
+                }}>
                     <div style={{ 
                         display: 'flex', 
                         justifyContent: 'space-between', 
@@ -159,7 +169,7 @@ export default function CommunitiesPage() {
                     </div>
                 </div>
 
-                {/* Lista de Comunidades */}
+                {/* --- LISTADO --- */}
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>Cargando...</div>
                 ) : communities.length === 0 ? (
@@ -169,7 +179,9 @@ export default function CommunitiesPage() {
                         border: 'none', 
                         backgroundColor: 'transparent'
                     }}>
-                        <p style={{ fontSize: '18px', fontWeight: '600', color: '#374151' }}>No se encontraron comunidades.</p>
+                        <p style={{ fontSize: '18px', fontWeight: '600', color: '#374151' }}>
+                            {filter === 'suscritas' ? "Aún no te has unido a ninguna comunidad." : "No hay comunidades creadas."}
+                        </p>
                         <p style={{ color: '#9CA3AF' }}>¡Sé el primero en crear una!</p>
                     </div>
                 ) : (
