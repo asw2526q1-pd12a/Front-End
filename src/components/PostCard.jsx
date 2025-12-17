@@ -63,7 +63,7 @@ const PostSaveButton = ({ post }) => {
 };
 
 // 2. --- POST CARD COMPONENT ---
-function PostCard({ post }) {
+function PostCard({ post, onUpdate }) {
     const {
         id,
         title,
@@ -82,14 +82,14 @@ function PostCard({ post }) {
     // Helper functions for localStorage persistence
     const getVoteFromStorage = (postId) => {
         if (!currentUser) return 0;
-        const key = `vote_post_{postId}_user_{currentUser.id}`;
+        const key = `vote_post_${postId}_user_${currentUser.id}`;
         const stored = localStorage.getItem(key);
         return stored ? parseInt(stored) : 0;
     };
 
     const saveVoteToStorage = (postId, value) => {
         if (!currentUser) return;
-        const key = `vote_post_{postId}_user_{currentUser.id}`;
+        const key = `vote_post_${postId}_user_${currentUser.id}`;
         if (value === 0) {
             localStorage.removeItem(key);
         } else {
@@ -160,20 +160,15 @@ function PostCard({ post }) {
 
             if (response.data && response.data.score !== undefined) {
                 setCurrentScore(response.data.score);
-
-                // 🛑 CRITICAL FIX: The Rails `handle_vote_for` determines the new vote status.
-                // It should return the new vote status (0, 1, or -1) in the response data.
-                // Assuming Rails returns it as `response.data.new_vote_value` or similar.
-
-                // If the response contains the new vote value, use that:
                 if (response.data.new_vote_value !== undefined) {
                     setUserVoteStatus(response.data.new_vote_value);
                 } else {
-                    // FALLBACK: Since we clicked the upvote button, the new state is 1, 
-                    // unless the old state was 1 (in which case the API sets it to 0).
-                    // This is less reliable than getting the value from the server.
                     setUserVoteStatus(targetVoteValue);
                 }
+            }
+            saveVoteToStorage(id, response.data.score);
+            if (onUpdate) {
+                onUpdate(response.data); 
             }
         } catch (error) {
             console.error("Upvote failed:", error.response || error);
@@ -184,9 +179,6 @@ function PostCard({ post }) {
     const downvotePost = async () => {
         if (!isLoggedIn) { alert("Debes iniciar sesión para votar."); return; }
 
-        // Determine the vote value to send: 
-        // If already downvoted (-1), the next click is an unvote (0).
-        // Otherwise, it's a standard downvote (-1).
         const targetVoteValue = userVoteStatus === -1 ? 0 : -1;
 
         try {
@@ -201,6 +193,10 @@ function PostCard({ post }) {
                     setUserVoteStatus(targetVoteValue);
                 }
             }
+            saveVoteToStorage(id, response.data.score);
+            if (onUpdate) {
+            onUpdate(response.data); 
+        }
         } catch (error) {
             console.error("Downvote failed:", error.response || error);
             alert("Error al intentar votar. Revisa la consola para más detalles.");
