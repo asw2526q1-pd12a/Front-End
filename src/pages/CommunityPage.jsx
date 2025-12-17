@@ -1,7 +1,8 @@
 // src/pages/CommunityPage.jsx
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getCommunity, API_BASE_URL } from '../services/api';
+import { getCommunity } from '../services/api';
+import PostCard from '../components/PostCard'; // 1. Importamos el componente PostCard
 
 export default function CommunityPage() {
     const { name } = useParams();
@@ -13,6 +14,7 @@ export default function CommunityPage() {
         const fetchCommunity = async () => {
             try {
                 const response = await getCommunity(name);
+                // Asumimos que la API devuelve los datos de la comunidad incluyendo sus posts
                 setCommunity(response.data);
             } catch (err) {
                 setError("Comunidad no encontrada: " + err.message);
@@ -36,11 +38,13 @@ export default function CommunityPage() {
     
     if (!community) return null;
 
+    // Extraemos los posts para mayor claridad. Si no existen, inicializamos como array vacío.
+    const posts = community.posts || [];
+
     return (
-        // Contenedor principal centrado, igual que ProfilePage
         <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', textAlign: 'left' }}>
             
-            {/* Tarjeta de la Comunidad: Fondo blanco, borde sutil, sombra suave */}
+            {/* Tarjeta de la Comunidad (Header) */}
             <div style={{ 
                 border: '1px solid #ddd', 
                 borderRadius: '8px', 
@@ -50,14 +54,10 @@ export default function CommunityPage() {
                 color: 'black',
                 marginBottom: '20px'
             }}>
-                
-                {/* Banner: Altura fija, gris por defecto si no hay imagen */}
                 <div style={{ 
                     height: '150px', 
                     backgroundColor: '#e0e0e0', 
-                    backgroundImage: community.banner 
-                        ? `url(${community.banner.startsWith('http') ? community.banner : API_BASE_URL + community.banner})` 
-                        : 'none', 
+                    backgroundImage: community.banner ? `url(${community.banner})` : 'none', 
                     backgroundSize: 'cover', 
                     backgroundPosition: 'center' 
                 }}>
@@ -68,10 +68,7 @@ export default function CommunityPage() {
                     )}
                 </div>
 
-                {/* Contenedor de Información (Avatar + Textos) */}
                 <div style={{ padding: '20px', position: 'relative' }}>
-                    
-                    {/* Avatar Superpuesto */}
                     <div style={{ 
                         position: 'absolute', 
                         top: '-50px', 
@@ -88,7 +85,7 @@ export default function CommunityPage() {
                     }}>
                         {community.avatar ? (
                             <img 
-                                src={community.avatar.startsWith('http') ? community.avatar : `${API_BASE_URL}${community.avatar}`} 
+                                src={community.avatar} 
                                 alt={community.name} 
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                             />
@@ -99,35 +96,15 @@ export default function CommunityPage() {
                         )}
                     </div>
 
-                    {/* Encabezado: Título y Slug (con margen izquierdo para salvar el avatar) */}
                     <div style={{ marginLeft: '120px', marginBottom: '20px', minHeight: '60px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <div>
-                                <h1 style={{ margin: '0', fontSize: '24px', color: '#111827' }}>
-                                    {community.title}
-                                </h1>
-                                <p style={{ margin: '0', color: '#666' }}>
-                                    {community.name}
-                                </p>
-                            </div>
-                            
-                            {/* Botón de Acción Minimalista */}
-                            <button 
-                                className="nav-button primary-button" 
-                                disabled 
-                                title="Funcionalidad de posts deshabilitada"
-                                style={{ 
-                                    padding: '8px 16px', 
-                                    fontSize: '13px', 
-                                    height: 'fit-content' 
-                                }}
-                            >
-                                Crear Post
-                            </button>
-                        </div>
+                        <h1 style={{ margin: '0', fontSize: '24px', color: '#111827' }}>
+                            {community.title}
+                        </h1>
+                        <p style={{ margin: '0', color: '#666' }}>
+                            {community.name}
+                        </p>
                     </div>
 
-                    {/* Estadísticas: Pie de tarjeta con borde superior */}
                     <div style={{ display: 'flex', gap: '20px', marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
                         <div>
                             <strong>{community.members_size || 0}</strong> Suscriptores
@@ -139,27 +116,33 @@ export default function CommunityPage() {
                             <strong>{community.total_comments_count || 0}</strong> Comentarios
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            {/* Sección de Posts (Separada visualmente pero alineada) */}
+            {/* Sección de Posts */}
             <div style={{ marginTop: '20px' }}>
                 <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#374151', marginBottom: '15px' }}>
                     Publicaciones
                 </h3>
                 
-                {/* Placeholder para posts con estilo limpio */}
-                <div style={{ 
-                    padding: '40px', 
-                    textAlign: 'center', 
-                    backgroundColor: 'white', 
-                    borderRadius: '8px', 
-                    border: '1px solid #ddd', 
-                    color: '#666',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                }}>
-                    <p>No hay publicaciones para mostrar.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {posts.length > 0 ? (
+                        posts.map(post => (
+                            <PostCard key={post.id} post={post} />
+                        ))
+                    ) : (
+                        <div style={{ 
+                            padding: '40px', 
+                            textAlign: 'center', 
+                            backgroundColor: 'white', 
+                            borderRadius: '8px', 
+                            border: '1px solid #ddd', 
+                            color: '#666',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                        }}>
+                            <p>Esta comunidad aún no tiene publicaciones.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
