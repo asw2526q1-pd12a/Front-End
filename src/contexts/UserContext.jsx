@@ -9,9 +9,10 @@ export const useUser = () => useContext(UserContext);
 const MOCK_USERS = [
   { id: 1, username: 'arnaaau', full_name: 'Arnau Miret', apiKey: 'b248085d65d0968c6df4384e9aa2a6fc25ccef6009acc7b1fd1c441ca86b5a5b' },
   { id: 2, username: 'NettieWelsh', full_name: 'Nettie Welsh Dev', apiKey: '31345103e3dfaa1d16f9fdbea78b9469c70241ba0cddb7dd46098cc7ba5cbcce' },
-  { id: 11, username: 'nettiewelsh', full_name: 'Nettie Welsh Prod', apiKey: 'be9f7d76709421710909c3a7f2cdb2b61a075b106edab81568b00a85a65660b7' },
+  { id: 3, username: 'nettiewelsh(Prod)', full_name: 'Nettie Welsh Prod', apiKey: '96b83e93acb8132503694a90f9ec7d23b8fe51015dd6c0607d4bd7a15d838f65' },
   { id: 4, username: 'andreu.corden', full_name: 'andreucordenm53a7a9', apiKey: 'a33591544877c7f2f1975fc489ab6926a3952474cc0d751097ccafd827169259' },
   { id: 5, username: 'holaa', full_name: 'Hola', apiKey: '65698c6179a535ced3527f59befa95dbe7a0897354da9db41c8b14b16a553352' },
+  { id: 6, username: 'arnau.miret(Prod)', full_name: 'Arnau Miret Prod', apiKey: '178ae570c4cb460bbfef850229cb9a0505abeb65b111b343718b9660028d189f' },
 ];
 
 export const UserProvider = ({ children }) => {
