@@ -5,7 +5,8 @@ import {
     getPosts, 
     getSubscribedPosts, 
     getComments, 
-    getSubscribedComments 
+    getSubscribedComments,
+    search
 } from '../services/api'; // Usamos las llamadas existentes
 
 import PostCard from '../components/PostCard'; 
@@ -43,38 +44,40 @@ function FeedPage() {
             
             try {
                 let response;
+                let data;
 
-                // LÓGICA DE SELECCIÓN DE API
-                // IMPORTANTE: Tu api.js espera getPosts(sortString), no un objeto.
-                
-                if (currentView === 'posts') {
-                    if (isSubscribed && user) {
-                        // Modo: Suscripciones
-                        response = await getSubscribedPosts(sort);
-                    } else {
-                        // Modo: Global (Aquí estaba el error, ahora llamamos correctamente)
-                        response = await getPosts(sort);
-                    }
-                } else { // currentView === 'comments'
-                    if (isSubscribed && user) {
-                        response = await getSubscribedComments(sort);
-                    } else {
-                        response = await getComments(sort);
-                    }
-                }
-                
-                // Normalizar respuesta: El backend puede devolver { posts: [] } o directamente []
-                let data = response.data.posts || response.data.comments || response.data;
-                
-                // Filtrado Cliente-Side para la búsqueda (ya que api.js getPosts solo acepta sort)
                 if (initialQuery) {
-                    const q = initialQuery.toLowerCase();
-                    data = data.filter(item => {
-                        const contentMatch = item.content && item.content.toLowerCase().includes(q);
-                        const titleMatch = item.title && item.title.toLowerCase().includes(q); // Solo posts tienen título
-                        const bodyMatch = item.body && item.body.toLowerCase().includes(q); // Comentarios suelen tener body
-                        return contentMatch || titleMatch || bodyMatch;
-                    });
+                    response = await search(initialQuery, sort);
+                    // Standardize response structure: it might return { posts: [], comments: [] }
+                    // We need to filter based on currentView
+                    const searchResults = response.data;
+                    
+                    if (currentView === 'posts') {
+                        // If searchResults has 'posts' key, use it. Otherwise assume it might be a flat list (unlikely based on user description) or mixed.
+                        // User said: "api search does return both post/commets" logic.
+                        // Assuming response.data = { posts: [...], comments: [...] }
+                        data = searchResults.posts || [];
+                    } else {
+                        data = searchResults.comments || [];
+                    }
+
+                } else {
+                    // LÓGICA DE SELECCIÓN DE API (EXISTENTE)
+                    if (currentView === 'posts') {
+                        if (isSubscribed && user) {
+                            response = await getSubscribedPosts(sort);
+                        } else {
+                            response = await getPosts(sort);
+                        }
+                    } else { // currentView === 'comments'
+                        if (isSubscribed && user) {
+                            response = await getSubscribedComments(sort);
+                        } else {
+                            response = await getComments(sort);
+                        }
+                    }
+                    // Normalizar respuesta: El backend puede devolver { posts: [] } o directamente []
+                    data = response.data.posts || response.data.comments || response.data;
                 }
 
                 setItems(data);
