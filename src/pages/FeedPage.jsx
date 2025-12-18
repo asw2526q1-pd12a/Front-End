@@ -145,7 +145,7 @@ function FeedPage() {
                         />
                     </div>
 
-                    <form onSubmit={handleSearchSubmit} style={{ width: '300px' }}>
+                    <form onSubmit={handleSearchSubmit} style={{ width: '300px', position: 'relative' }}>
                         <input 
                             type="text"
                             placeholder={currentView === 'posts' ? "Buscar posts..." : "Buscar comentarios..."}
@@ -153,7 +153,7 @@ function FeedPage() {
                             onChange={(e) => setSearchQuery(e.target.value)}
                             style={{
                                 width: '100%',
-                                padding: '10px 16px',
+                                padding: '10px 36px 10px 16px', // Right padding for the button
                                 borderRadius: '20px',
                                 border: '1px solid #E5E7EB',
                                 backgroundColor: '#F9FAFB',
@@ -161,6 +161,37 @@ function FeedPage() {
                                 fontSize: '14px',
                             }}
                         />
+                        {searchQuery && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    updateUrl({ query: null });
+                                }}
+                                style={{
+                                    position: 'absolute',
+                                    right: '10px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#9CA3AF',
+                                    cursor: 'pointer',
+                                    padding: '4px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#E5E7EB'}
+                                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        )}
                     </form>
                 </div>
 
