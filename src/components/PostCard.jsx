@@ -148,29 +148,34 @@ function PostCard({ post, onUpdate }) {
     const upvotePost = async () => {
         if (!isLoggedIn) { alert("Debes iniciar sesión para votar."); return; }
 
-        // Determine the vote value to send: 
-        // If already upvoted (1), the next click is an unvote (0).
-        // Otherwise, it's a standard upvote (1).
-        const targetVoteValue = userVoteStatus === 1 ? 0 : 1;
+        const previousVote = userVoteStatus;
+        const previousScore = currentScore;
+
+        let newVote, newScore;
+        if (userVoteStatus === 1) {
+            newVote = 0;
+            newScore = currentScore - 1;
+        } else if (userVoteStatus === -1) {
+            newVote = 1;
+            newScore = currentScore + 2;
+        } else {
+            newVote = 1;
+            newScore = currentScore + 1;
+        }
+
+        setUserVoteStatus(newVote);
+        setCurrentScore(newScore);
+        saveVoteToStorage(id, newVote);
 
         try {
-            // Note: We use the dedicated API call, which simplifies the target value handling
-            // The Rails backend handles the logic based on the endpoint (/upvote or /downvote)
             const response = await apiUpvotePost(id);
-
-            if (response.data && response.data.score !== undefined) {
-                setCurrentScore(response.data.score);
-                if (response.data.new_vote_value !== undefined) {
-                    setUserVoteStatus(response.data.new_vote_value);
-                } else {
-                    setUserVoteStatus(targetVoteValue);
-                }
-            }
-            saveVoteToStorage(id, response.data.score);
             if (onUpdate) {
                 onUpdate(response.data); 
             }
         } catch (error) {
+            setUserVoteStatus(previousVote);
+            setCurrentScore(previousScore);
+            saveVoteToStorage(id, previousVote);
             console.error("Upvote failed:", error.response || error);
             alert("Error al intentar votar. Revisa la consola para más detalles.");
         }
@@ -179,25 +184,34 @@ function PostCard({ post, onUpdate }) {
     const downvotePost = async () => {
         if (!isLoggedIn) { alert("Debes iniciar sesión para votar."); return; }
 
-        const targetVoteValue = userVoteStatus === -1 ? 0 : -1;
+        const previousVote = userVoteStatus;
+        const previousScore = currentScore;
+
+        let newVote, newScore;
+        if (userVoteStatus === -1) {
+            newVote = 0;
+            newScore = currentScore + 1;
+        } else if (userVoteStatus === 1) {
+            newVote = -1;
+            newScore = currentScore - 2;
+        } else {
+            newVote = -1;
+            newScore = currentScore - 1;
+        }
+
+        setUserVoteStatus(newVote);
+        setCurrentScore(newScore);
+        saveVoteToStorage(id, newVote);
 
         try {
             const response = await apiDownvotePost(id);
-
-            if (response.data && response.data.score !== undefined) {
-                setCurrentScore(response.data.score);
-
-                if (response.data.new_vote_value !== undefined) {
-                    setUserVoteStatus(response.data.new_vote_value);
-                } else {
-                    setUserVoteStatus(targetVoteValue);
-                }
-            }
-            saveVoteToStorage(id, response.data.score);
             if (onUpdate) {
-            onUpdate(response.data); 
-        }
+                onUpdate(response.data); 
+            }
         } catch (error) {
+            setUserVoteStatus(previousVote);
+            setCurrentScore(previousScore);
+            saveVoteToStorage(id, previousVote);
             console.error("Downvote failed:", error.response || error);
             alert("Error al intentar votar. Revisa la consola para más detalles.");
         }

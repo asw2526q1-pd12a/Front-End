@@ -5,7 +5,8 @@ import {
     getPosts, 
     getSubscribedPosts, 
     getComments, 
-    getSubscribedComments 
+    getSubscribedComments,
+    search
 } from '../services/api'; // Usamos las llamadas existentes
 
 import PostCard from '../components/PostCard'; 
@@ -43,38 +44,40 @@ function FeedPage() {
             
             try {
                 let response;
+                let data;
 
-                // LÓGICA DE SELECCIÓN DE API
-                // IMPORTANTE: Tu api.js espera getPosts(sortString), no un objeto.
-                
-                if (currentView === 'posts') {
-                    if (isSubscribed && user) {
-                        // Modo: Suscripciones
-                        response = await getSubscribedPosts(sort);
-                    } else {
-                        // Modo: Global (Aquí estaba el error, ahora llamamos correctamente)
-                        response = await getPosts(sort);
-                    }
-                } else { // currentView === 'comments'
-                    if (isSubscribed && user) {
-                        response = await getSubscribedComments(sort);
-                    } else {
-                        response = await getComments(sort);
-                    }
-                }
-                
-                // Normalizar respuesta: El backend puede devolver { posts: [] } o directamente []
-                let data = response.data.posts || response.data.comments || response.data;
-                
-                // Filtrado Cliente-Side para la búsqueda (ya que api.js getPosts solo acepta sort)
                 if (initialQuery) {
-                    const q = initialQuery.toLowerCase();
-                    data = data.filter(item => {
-                        const contentMatch = item.content && item.content.toLowerCase().includes(q);
-                        const titleMatch = item.title && item.title.toLowerCase().includes(q); // Solo posts tienen título
-                        const bodyMatch = item.body && item.body.toLowerCase().includes(q); // Comentarios suelen tener body
-                        return contentMatch || titleMatch || bodyMatch;
-                    });
+                    response = await search(initialQuery, sort);
+                    // Standardize response structure: it might return { posts: [], comments: [] }
+                    // We need to filter based on currentView
+                    const searchResults = response.data;
+                    
+                    if (currentView === 'posts') {
+                        // If searchResults has 'posts' key, use it. Otherwise assume it might be a flat list (unlikely based on user description) or mixed.
+                        // User said: "api search does return both post/commets" logic.
+                        // Assuming response.data = { posts: [...], comments: [...] }
+                        data = searchResults.posts || [];
+                    } else {
+                        data = searchResults.comments || [];
+                    }
+
+                } else {
+                    // LÓGICA DE SELECCIÓN DE API (EXISTENTE)
+                    if (currentView === 'posts') {
+                        if (isSubscribed && user) {
+                            response = await getSubscribedPosts(sort);
+                        } else {
+                            response = await getPosts(sort);
+                        }
+                    } else { // currentView === 'comments'
+                        if (isSubscribed && user) {
+                            response = await getSubscribedComments(sort);
+                        } else {
+                            response = await getComments(sort);
+                        }
+                    }
+                    // Normalizar respuesta: El backend puede devolver { posts: [] } o directamente []
+                    data = response.data.posts || response.data.comments || response.data;
                 }
 
                 setItems(data);
@@ -142,7 +145,7 @@ function FeedPage() {
                         />
                     </div>
 
-                    <form onSubmit={handleSearchSubmit} style={{ width: '300px' }}>
+                    <form onSubmit={handleSearchSubmit} style={{ width: '300px', position: 'relative' }}>
                         <input 
                             type="text"
                             placeholder={currentView === 'posts' ? "Buscar posts..." : "Buscar comentarios..."}
@@ -150,7 +153,7 @@ function FeedPage() {
                             onChange={(e) => setSearchQuery(e.target.value)}
                             style={{
                                 width: '100%',
-                                padding: '10px 16px',
+                                padding: '10px 36px 10px 16px', // Right padding for the button
                                 borderRadius: '20px',
                                 border: '1px solid #E5E7EB',
                                 backgroundColor: '#F9FAFB',
@@ -158,6 +161,37 @@ function FeedPage() {
                                 fontSize: '14px',
                             }}
                         />
+                        {searchQuery && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    updateUrl({ query: null });
+                                }}
+                                style={{
+                                    position: 'absolute',
+                                    right: '10px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#9CA3AF',
+                                    cursor: 'pointer',
+                                    padding: '4px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#E5E7EB'}
+                                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        )}
                     </form>
                 </div>
 
